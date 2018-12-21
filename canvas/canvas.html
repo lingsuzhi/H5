@@ -9,24 +9,30 @@
 
 </head>
 <body>
+<div>
+    <div style="float:left;width: 100px">
 <input type="button" value="刷新" onclick="btn1()">
+<input type="button" value="矩形" onclick="drawDo('select')">
+    </div>
+    <div>
 <canvas id="myCanvas" width="1024" height="1024">
     您的浏览器不支持 HTML5 canvas 标签。
 </canvas>
+    </div>
+</div>
 <script>
 
-    var cvs = new  LszCanvans("myCanvas");
+    var cvs = new LszCanvans("myCanvas");
     cvs.pushImg("1.jpg")
     cvs.refresh();
 
-function btn1() {
-    cvs.mouseRect.show = true;
-    cvs.mouseRect.x1 = 10;
-    cvs.mouseRect.x2 = 100;
-    cvs.mouseRect.y1 = 10;
-    cvs.mouseRect.y2 = 100;
-    cvs.refresh();
-}
+    function btn1() {
+        cvs.refresh();
+    }
+
+    function drawDo(type) {
+        cvs.setDraw(type);
+    }
 </script>
 
 </body>

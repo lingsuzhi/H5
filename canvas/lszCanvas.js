@@ -7,31 +7,19 @@ function LszCanvans(canvansId) {
     me.objArr = [];
     me.width = 1024;
     me.height = 1024;
+    me.draw = {
+        type: ''
+    };
 
+    me.setDraw = function (type) {
+        me.draw.type = type;
+        me.canvansDom.style.cursor = 'crosshair';
+    }
     //鼠标矩形
     me.mouseRectDraw = function (ca) {
         if (me.mouseRect.show) {
-            let x1 = me.mouseRect.x1;
-            let x2 = me.mouseRect.x2;
-
-            let y1 = me.mouseRect.y1;
-            let y2 = me.mouseRect.y2;
-            let tmp = 0;
-            if (x1 > x2) {
-                tmp = x1;
-                x1 = x2;
-                x2 = tmp;
-            }
-            if (y1 > y2) {
-                tmp = y1;
-                y1 = y2;
-                y2 = tmp;
-            }
-            let left = x1;
-            let top = y1;
-            let wid = x2 - x1;
-            let hei = y2 - y1;
-            ca.strokeRect(left, top, wid, hei);
+            var rect = me.mouseRect.getRect();
+            ca.strokeRect(rect.left, rect.top, rect.wid, rect.hei);
         }
     }
     me.mouseRect = {
@@ -39,7 +27,10 @@ function LszCanvans(canvansId) {
         x1: 0,
         y1: 0,
         x2: 0,
-        y2: 0
+        y2: 0,
+        getRect: function () {
+            return canvasUtil.posToRect(me.mouseRect.x1, me.mouseRect.y1, me.mouseRect.x2, me.mouseRect.y2);
+        }
     }
     me.del = function (xxkType) {
         for (let i = 0; i < me.objArr; i++) {
@@ -49,6 +40,18 @@ function LszCanvans(canvansId) {
                 break;
             }
         }
+    }
+    me.pushObj = function (type, rect) {
+        me.objArr.push({
+            type: type,
+            data: {},
+            left: rect.left,
+            top: rect.top,
+            wid: rect.wid,
+            hei: rect.hei,
+            focus: false,
+            sort: me.objArr.length + 1
+        })
     }
     me.pushImg = function (url, left, top) {
         var img = canvasUtil.loadImg(url);
@@ -63,6 +66,7 @@ function LszCanvans(canvansId) {
             data: img,
             left: left,
             top: top,
+            focus: false,
             sort: me.objArr.length + 1
         })
     }
@@ -72,16 +76,16 @@ function LszCanvans(canvansId) {
         for (let obj of me.objArr) {
             if (obj.type == "img") {
                 me.buff.drawImage(obj.data, obj.left, obj.top);
+            } else if (obj.type = "select") {
+                drawSelect(obj);
             }
-
         }
         me.mouseRectDraw(me.buff);
         var imgData = me.buff.getImageData(0, 0, me.width, me.height);
         me.ctx.putImageData(imgData, 0, 0);
     }
-
     me.canvansDom.onmousedown = function (e) {
-        if(e.button = 1){
+        if (e.button = 1) {
             //左键
             me.mouseRect.show = true;
             me.mouseRect.x1 = e.layerX;
@@ -92,9 +96,9 @@ function LszCanvans(canvansId) {
         }
     }
     me.canvansDom.onmousemove = function (e) {
-        if(e.button = 1) {
+        if (e.button = 1) {
             //左键
-            if(me.mouseRect.show){
+            if (me.mouseRect.show) {
                 me.mouseRect.x2 = e.layerX;
                 me.mouseRect.y2 = e.layerY;
 
@@ -102,12 +106,56 @@ function LszCanvans(canvansId) {
             }
         }
     }
-    me.canvansDom.onmouseup = function (e) {
-        if(e.button = 1){
-            //左键
-            me.mouseRect.show = false;
+
+    function findObj(x, y) {
+        for (let obj of me.objArr) {
+            if (obj.type == "img") {
+                // img 不算
+            } else {
+                //暂时不排序
+                obj.focus = false;
+                if (x > obj.left && x < (obj.left + obj.wid)
+                    && y > obj.top && y < (obj.top + obj.hei)) {
+                    obj.focus = true;
+
+                }
+
+            }
         }
     }
+
+    me.canvansDom.onmouseup = function (e) {
+        let x = e.layerX;
+        let y = e.layerY;
+        if (e.button = 1) {
+            //左键
+            me.mouseRect.show = false;
+            if (me.draw.type == 'select') {
+                me.canvansDom.style.cursor = 'default';
+                var rect = me.mouseRect.getRect();
+                me.pushObj(me.draw.type, rect);
+            }else  if (me.draw.type == '') {
+                findObj(x,y)
+            }
+            me.refresh();
+            me.draw.type = '';
+        }
+    }
+
+    function drawSelect(obj) {
+        let ctx = me.buff;
+        let rect = obj;
+
+        if (obj.focus){
+            //焦点 画8个矩形
+            ctx.strokeStyle="#FF0000";
+
+        }else{
+            ctx.strokeStyle="#333333";
+        }
+        ctx.strokeRect(rect.left, rect.top, rect.wid, rect.hei);
+    }
+
 }
 
 function newCtx(wid, hei) {
