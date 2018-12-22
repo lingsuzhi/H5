@@ -1,9 +1,28 @@
 function LszCanvans(canvansId) {
     var me = this;
-
+    me.outoId = 0;
     me.canvansDom = document.getElementById(canvansId);
     me.ctx = me.canvansDom.getContext("2d");
+    me.objLeft = 50;
 
+    me.objSelect = {
+        wid: 80,
+        hei: 30,
+        type: 'select'
+    };
+    me.objCondition = {
+        wid: 300,
+        hei: 30,
+        type: 'condition'
+    };
+    me.objCondition.wid1 = me.objCondition.wid / 5 * 2 - 2;
+    me.objCondition.wid2 = me.objCondition.wid / 5 * 1 + 5;
+    me.objCondition.wid3 = me.objCondition.wid / 5 * 2 - 2;
+
+    me.objTop = 50;
+    me.objSpaceWid = 6;
+    me.objSpaceHei = 5;
+    //js 就是好，变量都不需要声明，直接用
     me.objArr = [];
     me.width = 1024;
     me.height = 1024;
@@ -16,10 +35,11 @@ function LszCanvans(canvansId) {
         me.canvansDom.style.cursor = 'crosshair';
     }
     //鼠标矩形
-    me.mouseRectDraw = function (ca) {
+    me.mouseRectDraw = function (ctx) {
         if (me.mouseRect.show) {
+            ctx.setLineDash([6,4]);
             var rect = me.mouseRect.getRect();
-            ca.strokeRect(rect.left, rect.top, rect.wid, rect.hei);
+            ctx.strokeRect(rect.left, rect.top, rect.wid, rect.hei);
         }
     }
     me.mouseRect = {
@@ -32,7 +52,7 @@ function LszCanvans(canvansId) {
             return canvasUtil.posToRect(me.mouseRect.x1, me.mouseRect.y1, me.mouseRect.x2, me.mouseRect.y2);
         }
     }
-    me.del = function (xxkType) {
+    me.delObj = function (xxkType) {
         for (let i = 0; i < me.objArr; i++) {
             let obj = me.objArr[i];
             if (obj.type == xxkType) {
@@ -41,8 +61,19 @@ function LszCanvans(canvansId) {
             }
         }
     }
+    me.newObj = function (obj, arr) {
+        obj.id = getNewId();
+        obj.children = [];
+        arr.push(obj);
+    }
+
+    function getNewId() {
+        me.outoId = me.outoId + 1;
+        return me.outoId;
+    }
+
     me.pushObj = function (type, rect) {
-        me.objArr.push({
+        me.newObj({
             type: type,
             data: {},
             left: rect.left,
@@ -51,7 +82,7 @@ function LszCanvans(canvansId) {
             hei: rect.hei,
             focus: false,
             sort: me.objArr.length + 1
-        })
+        }, me.objArr)
     }
     me.pushImg = function (url, left, top) {
         var img = canvasUtil.loadImg(url);
@@ -61,28 +92,73 @@ function LszCanvans(canvansId) {
         if (!top) {
             top = 0;
         }
-        me.objArr.push({
+        me.newObj({
             type: "img",
             data: img,
             left: left,
             top: top,
             focus: false,
             sort: me.objArr.length + 1
-        })
+        }, me.objArr)
     }
     me.buff = newCtx(me.width, me.height);
+
     me.refresh = function () {
+        me.refreshHei = 0;
         me.buff.clearRect(0, 0, me.width, me.height);
-        for (let obj of me.objArr) {
+        me.refreshEx(me.objArr);
+        me.mouseRectDraw(me.buff);
+       // drawLine(me.buff, 10, 10, 100, 100);
+        let imgData = me.buff.getImageData(0, 0, me.width, me.height);
+        me.ctx.putImageData(imgData, 0, 0);
+    }
+
+    me.refreshEx = function (arr, parent) {
+        for (let obj of arr) {
             if (obj.type == "img") {
                 me.buff.drawImage(obj.data, obj.left, obj.top);
-            } else if (obj.type = "select") {
-                drawSelect(obj);
+            } else {
+                //初始化
+                obj.treeLeft = obj.left + obj.wid + me.objSpaceWid;
+
+                if (parent) {
+                    obj.left = parent.treeLeft;
+                    obj.top = me.refreshHei;
+                    me.refreshHei = me.refreshHei + obj.hei + me.objSpaceHei;
+
+                    let lineX = parent.left + parent.wid  / 2;
+                    let lineY2 = me.refreshHei - parent.hei  /2 - 3;
+                    let color = '#5FB878';
+                    if (parent.data.leftType == 'and'){
+                        color = '#FF5722'
+                    }
+                    drawLine(me.buff, lineX , parent.top+ parent.hei + 1,lineX, lineY2,color);
+
+                    drawLine(me.buff,lineX,lineY2,obj.left,lineY2,color);
+                } else {
+                    me.refreshHei = obj.top + obj.hei;
+                }
+                if (obj.type == "select") {
+                    drawSelect(obj);
+                } else if (obj.type == 'condition') {
+                    //条件
+                    drawCondition(obj);
+                } else if (obj.type == 'rect') {
+                    drawRect(obj);
+                }
+
+                //递归
+                if (obj.children && obj.children.length) {
+                    me.refreshEx(obj.children, obj);
+
+
+
+                }
+
+
             }
+
         }
-        me.mouseRectDraw(me.buff);
-        var imgData = me.buff.getImageData(0, 0, me.width, me.height);
-        me.ctx.putImageData(imgData, 0, 0);
     }
     me.canvansDom.onmousedown = function (e) {
         if (e.button = 1) {
@@ -94,6 +170,37 @@ function LszCanvans(canvansId) {
             me.mouseRect.x2 = me.mouseRect.x1;
             me.mouseRect.y2 = me.mouseRect.y1;
         }
+    }
+    me.findById = function (id, arr) {
+        for (let obj of arr) {
+            if (obj.id == id) {
+                return obj;
+            }
+            //递归
+            if (obj.children && obj.children.length) {
+                let b = me.findById(id, obj.children);
+                if (b) {
+                    return b;
+                }
+            }
+        }
+        return false;
+    }
+    me.findFocus = function (arr) {
+        for (let obj of arr) {
+            if (obj.focus == true) {
+                return obj;
+            }
+
+            //递归
+            if (obj.children && obj.children.length) {
+                let b = me.findFocus(obj.children);
+                if (b) {
+                    return b;
+                }
+            }
+        }
+        return false;
     }
     me.canvansDom.onmousemove = function (e) {
         if (e.button = 1) {
@@ -107,8 +214,8 @@ function LszCanvans(canvansId) {
         }
     }
 
-    function findObj(x, y) {
-        for (let obj of me.objArr) {
+    function findObj(x, y, arr) {
+        for (let obj of arr) {
             if (obj.type == "img") {
                 // img 不算
             } else {
@@ -119,43 +226,153 @@ function LszCanvans(canvansId) {
                     obj.focus = true;
 
                 }
+                //递归
+                if (obj.children && obj.children.length) {
+                    findObj(x, y, obj.children);
+                }
 
             }
         }
     }
 
+    function drawLine(ctx, x, y, x2, y2,color) {
+        if (!color){
+            color = '#ccc';
+        }
+        ctx.setLineDash([5]);
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = color;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+    }
+
+    me.pushObjByParent = function (parentId, objEnum) {
+        let parent = me.findById(parentId, me.objArr);
+        if (!parent) {
+            return false;
+        }
+        let obj = {
+            type: objEnum.type,
+            parentId: parentId,
+            data: {},
+            wid: objEnum.wid,
+            hei: objEnum.hei,
+            focus: false,
+            sort: parent.children.length + 1
+        };
+        me.newObj(obj, parent.children);
+
+    }
     me.canvansDom.onmouseup = function (e) {
         let x = e.layerX;
         let y = e.layerY;
         if (e.button = 1) {
             //左键
             me.mouseRect.show = false;
-            if (me.draw.type == 'select') {
-                me.canvansDom.style.cursor = 'default';
+            if (me.draw.type == 'rect') {
+
                 var rect = me.mouseRect.getRect();
                 me.pushObj(me.draw.type, rect);
-            }else  if (me.draw.type == '') {
-                findObj(x,y)
+            } else if (me.draw.type == '') {
+                findObj(x, y, me.objArr);
             }
             me.refresh();
             me.draw.type = '';
+            me.canvansDom.style.cursor = 'default';
         }
     }
 
+    //条件
+    function drawCondition(obj) {
+        let ctx = me.buff;
+        let rect = {
+            left: obj.left,
+            top: obj.top,
+            wid: me.objCondition.wid1,
+            hei: obj.hei
+        };
+        if (obj.data) {
+            ctx.fillStyle = "#EEEEEE";
+            ctx.fillRect(rect.left, rect.top, rect.wid, rect.hei);
+            drawText(obj.data.text, ctx, rect);
+//中间
+            rect.left = rect.left + rect.wid;
+            rect.wid = me.objCondition.wid2;
+            ctx.fillStyle = "#99EE99";
+            ctx.fillRect(rect.left, rect.top, rect.wid, rect.hei);
+
+            drawText(obj.data.optText, ctx, rect);
+//右间
+            rect.left = rect.left + rect.wid;
+            rect.wid = me.objCondition.wid3;
+            ctx.fillStyle = "#EEEEEE";
+            ctx.fillRect(rect.left, rect.top, rect.wid, rect.hei);
+
+            drawText(obj.data.resultText, ctx, rect);
+        }
+    }
+    function drawRect(obj){
+        drawSelect(obj);
+    }
+    //联合条件
     function drawSelect(obj) {
         let ctx = me.buff;
         let rect = obj;
-
-        if (obj.focus){
+        ctx.setLineDash([]);
+        if (obj.focus) {
             //焦点 画8个矩形
-            ctx.strokeStyle="#FF0000";
+            ctx.strokeStyle = "#FF0000";
 
-        }else{
-            ctx.strokeStyle="#333333";
+        } else {
+            ctx.strokeStyle = "#333333";
         }
         ctx.strokeRect(rect.left, rect.top, rect.wid, rect.hei);
+        if (obj.data) {
+            drawText(obj.data.text, ctx, rect);
+        }
     }
 
+    function drawText(text, ctx, rect) {
+        if (text) {
+            ctx.fillStyle = "#333333";
+
+            ctx.font = "20px Arial";
+            ctx.textAlign = 'center';
+
+            ctx.fillText(text, rect.left + (rect.wid / 2), rect.top + 22);
+        }
+    }
+
+    //分分钟转换成json
+    me.toJson = function () {
+        let json = [];
+        let newJson = toJsonEx(me.objArr, json);
+        return JSON.stringify(newJson);
+    }
+
+    function toJsonEx(arr, jsonArr) {
+        for (let obj of arr) {
+            let json = {};
+            let data = obj.data;
+            json.type = obj.type;
+            json.text = data.text ;
+            json.leftType = data.leftType;
+            if (data.resultType){
+                json.resultType = data.resultType;
+                json.resultText = data.resultText;
+                json.optType = data.optType;
+                json.optText = data.optText;
+            }
+            if (obj.children && obj.children.length) {
+                json.children = [];
+                toJsonEx(obj.children, json.children);
+            }
+            jsonArr.push(json);
+        }
+        return jsonArr;
+    }
 }
 
 function newCtx(wid, hei) {

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+    <title></title>
+    <body>
+        <div id="myDiv">
+               Right click or Ctrl+click me to get a custom context menu.
+               Click anywhere esle to get the default context menu.
+        </div>
+         <ul id="myMenu" style="postion: absolute; visibility: hidden; background: silver;">
+             <li>
+                   <a href="http://www.baidu.com">baidu</a>
+                   <a href="http://www.huawei.com">huawei</a>
+                   <a href="http://www.cnblogs.com">cnblogs</a>
+             </li>
+         </ul>
+    </body>
+</html>
+
+<script>
+    var EventUtil = {
+
+        addHandler:   function(element, type, handler){
+            if(element.addEventListener){
+                element.addEventListener(type, handler, false);
+            }else if(element.attachEvent){
+                element.attachEvent("on" + type, handler);
+            }else{
+                element["on" + type] = handler;
+            }
+        },
+
+        getEvent: function(event){
+            return event?event: window.event;
+        },
+
+        getTarget: function(event){
+            return event.target|| event.srcElement;
+        },
+
+        preventDefault: function(event){
+            if(event.preventDefault){
+                event.preventDefault();
+            }else{
+                event.returnValue = false;
+            }
+        },
+
+        removeHandler: function(event){
+            if(element.removeEventListener){
+                element.removeEventListener(type, handler, false);
+            }
+            else if(element.detachEvent)
+            {
+                element.detachEvent("on" + type, handler);
+            }else{
+                element["on" + type] = null;
+            }
+        },
+
+        stopPropagation: function(event){
+            if(event.stopPropagation){
+                event.stopPropagation();
+            }else{
+                event.cancelBubble = true;
+            }
+        },
+
+        getCharCode: function(event){
+            if(typeof event.charCode == "number"){
+                return event.charCode;
+            }else{
+                return event.keyCode;
+            }
+        }
+    }
+
+    EventUtil.addHandler(window, "load", function(event){
+
+        var div = document.getElementById("myDiv");
+
+        EventUtil.addHandler(div, "contextmenu", function(event){
+            event = EventUtil.getEvent(event);
+            EventUtil.preventDefault(event);
+
+            var menu = document.getElementById("myMenu");
+            menu.style.left = event.clientX + "px";
+            menu.style.top = event.clientY + "px";
+            menu.style.visibility = "visible";
+        });
+
+        EventUtil.addHandler(document, "click", function(event){
+            document.getElementById("myMenu").style.visibility = "hidden";
+        });
+    })
+</script>

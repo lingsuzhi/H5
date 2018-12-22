@@ -2,38 +2,91 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>菜鸟教程(runoob.com)</title>
+    <title>0.0规则引擎</title>
 
+    <script src="EventUtil.js"></script>
     <script src="canvasUtil.js"></script>
     <script src="lszCanvas.js"></script>
+    <style type="text/css">
+        body,ul,li{margin:0;padding:0;}
+        body{font:12px/24px arial;}
+        .menu{position:absolute;top:-9999px;left:-9999px;width:130px;border-radius:3px;list-style-type:none;border:1px solid #8f8f8f;padding:2px;background:#fff;}
+        .menu li{position:relative;height:24px;padding-left:24px;background:#eaead7;vertical-align:top;}
+        .menu li a{display:block;color:#333;background:#fff;padding-left:5px;text-decoration:none;}
+        .menu li.active {background:#999;}
+        .menu li.active a{color:#fff;background:#8f8f8f;}
+        .menu li em{position:absolute;top:0;left:0;width:24px;height:24px;}
+        /*background:url(img/ico.png) no-repeat;*/
+        .menu li em.cut{background-position:0 0;}
+        .menu li em.copy{background-position:0 -24px;}
+        .menu li em.paste{background-position:0 -48px;}
+    </style>
+    <script src="../common/jquery.js"></script>
+    <script src="layer/layer.js"></script>
 
 </head>
 <body>
 <div>
-    <div style="float:left;width: 100px">
+    <div style="float:right;width: 100px;margin-top: 100px;margin-right: 100px">
+
+        <div hidden>
 <input type="button" value="刷新" onclick="btn1()">
-<input type="button" value="矩形" onclick="drawDo('select')">
+<input type="button" value="矩形" onclick="drawDo('rect')">
+        </div>
+
+        <input type="button" value="json格式" onclick="showJson()"/>
     </div>
     <div>
 <canvas id="myCanvas" width="1024" height="1024">
-    您的浏览器不支持 HTML5 canvas 标签。
+    贺子华是个小菜B
 </canvas>
     </div>
 </div>
-<script>
+<ul id="menuAdd" class="menu" style="visibility: hidden; background: silver;">
 
-    var cvs = new LszCanvans("myCanvas");
-    cvs.pushImg("1.jpg")
-    cvs.refresh();
+    <li class="" data-type = 'condition'><em  ></em><a href="javascript:;">添加条件</a></li>
+    <li class="" data-type = 'unionCondition'><em  ></em><a href="javascript:;">添加联合条件</a></li>
 
-    function btn1() {
-        cvs.refresh();
-    }
+</ul>
 
-    function drawDo(type) {
-        cvs.setDraw(type);
-    }
-</script>
+<ul id="menu_select" class="menu"  style="visibility: hidden; background: silver;">
+    <li class="" data-type = 'and'><em  ></em><a href="javascript:;">并且</a></li>
+    <li class="" data-type = 'or'><em  ></em><a href="javascript:;">或者</a></li>
+</ul>
+<ul id="menu_condition" class="menu"  style="visibility: hidden; background: silver;">
+    <li class="" data-type = 'education'><em  ></em><a href="javascript:;">学历</a></li>
+    <li class="" data-type = 'age'><em  ></em><a href="javascript:;">年龄</a></li>
+    <li class="" data-type = 'sex'><em  ></em><a href="javascript:;">性别</a></li>
+</ul>
 
+<ul id="menu_compare" class="menu"  style="visibility: hidden; background: silver;">
+    <li class="" data-type = 'greater'><em  ></em><a href="javascript:;">大于</a></li>
+    <li class="" data-type = 'equal'><em  ></em><a href="javascript:;">等于</a></li>
+    <li class="" data-type = 'less'><em  ></em><a href="javascript:;">小于</a></li>
+</ul>
+
+<ul id="menu_result_education" class="menu"  style="visibility: hidden; background: silver;">
+    <li class="" data-type = 'dazhuan'><em  ></em><a href="javascript:;">大专</a></li>
+    <li class="" data-type = 'benke'><em  ></em><a href="javascript:;">本科</a></li>
+    <li class="" data-type = 'shuoshi'><em  ></em><a href="javascript:;">硕士</a></li>
+    <li class="" data-type = 'boshi'><em  ></em><a href="javascript:;">博士</a></li>
+    <li class="" data-type = 'nvboshi'><em  ></em><a href="javascript:;">女博士</a></li>
+</ul>
+
+<ul id="menu_result_age" class="menu"  style="visibility: hidden; background: silver;">
+    <li class="" data-type = 'age18'><em  ></em><a href="javascript:;">18</a></li>
+    <li class="" data-type = 'age20'><em  ></em><a href="javascript:;">20</a></li>
+    <li class="" data-type = 'age25'><em  ></em><a href="javascript:;">25</a></li>
+    <li class="" data-type = 'age30'><em  ></em><a href="javascript:;">30</a></li>
+    <li class="" data-type = 'age40'><em  ></em><a href="javascript:;">40</a></li>
+    <li class="" data-type = 'age50'><em  ></em><a href="javascript:;">50</a></li>
+</ul>
+<ul id="menu_result_sex" class="menu"  style="visibility: hidden; background: silver;">
+    <li class="" data-type = 'man'><em  ></em><a href="javascript:;">男</a></li>
+    <li class="" data-type = 'woman'><em  ></em><a href="javascript:;">女</a></li>
+    <li class="" data-type = 'hzh'><em  ></em><a href="javascript:;">贺子华</a></li>
+</ul>
 </body>
 </html>
+
+<script src="business.js"></script>
