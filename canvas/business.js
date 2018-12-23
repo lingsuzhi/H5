@@ -57,6 +57,11 @@ function menuClick(id, type, item) {
     } else if (type == 'or') {
         obj.data.text = '或者';
         obj.data.leftType = type;
+    } else if (type == 'kill') {
+        if(obj.id != 1){
+            obj.state = 'kill';
+        }
+
     } else if (type == 'condition') {
         cvs.pushObjByParent(id, cvs.objCondition)
     } else if (type == 'unionCondition') {
@@ -235,6 +240,7 @@ EventUtil.addHandler(document.getElementById('myCanvas'), "click", function (eve
                         htmlStr += getLiHtml(comp, 'left');
 
                     }
+                    htmlStr +=  `<li onclick="liClick(this)" class="" data-type = 'kill' ><em  ><i class="layui-icon" style="font-size: 20px; margin-left: 2px; color: #FF8888;">&#x1007;</i></em><a href="javascript:;">删除</a></li>`
                 }
             }
 
@@ -254,4 +260,15 @@ EventUtil.addHandler(document.getElementById('myCanvas'), "click", function (eve
         }
 
     }
+});
+
+$("#myCanvas").dblclick(function(){
+
+    layer.open({
+        type: 2,
+        title: "0.0 满足前端一切需求~",
+        //    closeBtn: 0,
+        area: ['55%', '75%'],
+        content: 'edit.html'
+    });
 });

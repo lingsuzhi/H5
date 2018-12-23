@@ -128,7 +128,13 @@ function LszCanvans(canvansId) {
     }
 
     me.refreshEx = function (arr, parent) {
+
         for (let obj of arr) {
+            if (obj.state == 'kill'){
+                //arr.splice(i,1); //还是不要删把
+                continue;
+            }
+
             if (obj.type == "img") {
                 me.buff.drawImage(obj.data, obj.left, obj.top);
             } else {
@@ -186,6 +192,9 @@ function LszCanvans(canvansId) {
     }
     me.findById = function (id, arr) {
         for (let obj of arr) {
+            if (obj.state == 'kill'){
+                continue;
+            }
             if (obj.id == id) {
                 return obj;
             }
@@ -201,6 +210,9 @@ function LszCanvans(canvansId) {
     }
     me.findFocus = function (arr) {
         for (let obj of arr) {
+            if (obj.state == 'kill'){
+                continue;
+            }
             if (obj.focus == true) {
                 return obj;
             }
@@ -231,6 +243,9 @@ function LszCanvans(canvansId) {
 
     function findObj(x, y, arr) {
         for (let obj of arr) {
+            if (obj.state == 'kill'){
+                continue;
+            }
             if (obj.type == "img") {
                 // img 不算
             } else {
@@ -293,7 +308,9 @@ function LszCanvans(canvansId) {
         if (me.draw.type == 'rect') {
 
             var rect = me.mouseRect.getRect();
-            me.pushObj(me.draw.type, rect);
+            if (rect.wid){
+                me.pushObj(me.draw.type, rect);
+            }
         } else if (me.draw.type == '') {
             findObj(x, y, me.objArr);
         }
@@ -301,7 +318,6 @@ function LszCanvans(canvansId) {
         me.draw.type = '';
         if (me.appendImg) {
             me.pushImg(me.appendImg, x - me.appendImg.width / 2, y - me.appendImg.height / 2)
-
 
             me.appendImg = false;
         }
@@ -340,11 +356,16 @@ function LszCanvans(canvansId) {
     }
 
     function drawRect(obj) {
-        drawSelect(obj);
+        let text = obj.data.text;
+        if(!text){
+            text = '双击修改';
+        }
+
+        drawSelect(obj,text);
     }
 
     //联合条件
-    function drawSelect(obj) {
+    function drawSelect(obj,text) {
         let ctx = me.buff;
         let rect = obj;
         ctx.setLineDash([]);
@@ -357,7 +378,10 @@ function LszCanvans(canvansId) {
         }
         ctx.strokeRect(rect.left, rect.top, rect.wid, rect.hei);
         if (obj.data) {
-            drawText(obj.data.text, ctx, rect);
+            if (!text){
+                text = obj.data.text;
+            }
+            drawText(text, ctx, rect);
         }
     }
 
@@ -381,6 +405,9 @@ function LszCanvans(canvansId) {
 
     function toJsonEx(arr, jsonArr) {
         for (let obj of arr) {
+            if (obj.state == 'kill'){
+                continue;
+            }
             let json = {};
             let data = obj.data;
             json.type = obj.type;
