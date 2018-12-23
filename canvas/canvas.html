@@ -12,7 +12,7 @@
         body{font:12px/24px arial;}
         .menu{position:absolute;top:-9999px;left:-9999px;width:130px;border-radius:3px;list-style-type:none;border:1px solid #8f8f8f;padding:2px;background:#fff;}
         .menu li{position:relative;height:24px;padding-left:24px;background:#eaead7;vertical-align:top;}
-        .menu li a{display:block;color:#333;background:#fff;padding-left:5px;text-decoration:none;}
+        .menu li a{display:block;color:#333;background:#fff;padding-left:5px;text-decoration:none; height: 100%; }
         .menu li.active {background:#999;}
         .menu li.active a{color:#fff;background:#8f8f8f;}
         .menu li em{position:absolute;top:0;left:0;width:24px;height:24px;}
@@ -22,22 +22,31 @@
         .menu li em.paste{background-position:0 -48px;}
     </style>
     <script src="../common/jquery.js"></script>
-    <script src="layer/layer.js"></script>
+    <script src="layui/layui.all.js"></script>
+    <link rel="stylesheet" href="layui/css/layui.css">
+
 
 </head>
 <body>
 <div>
-    <div style="float:right;width: 100px;margin-top: 100px;margin-right: 100px">
+    <div style="float:left;margin-top: 80px;margin-left: 80px">
 
         <div hidden>
 <input type="button" value="刷新" onclick="btn1()">
 <input type="button" value="矩形" onclick="drawDo('rect')">
         </div>
 
-        <input type="button" value="json格式" onclick="showJson()"/>
+
+        <input  type="button" class="layui-btn layui-btn-radius layui-btn-primary" value="json格式" onclick="showJson()"/>
+        <br />
+        <input style="margin-top: 10px" type="button" class="layui-btn layui-btn-radius layui-btn-primary" value="红花★" onmousedown="addFlower('hh.jpg')"/>
+        <br/>
+        <input style="margin-top: 10px" type="button" class="layui-btn layui-btn-radius layui-btn-primary" value="向日葵" onmousedown="addFlower('xrk.png')"/>
+        <br/>
+        <input style="margin-top: 10px" type="button" class="layui-btn layui-btn-radius layui-btn-primary" value="小豌豆" onmousedown="addFlower('wdss.jpg')"/>
     </div>
-    <div>
-<canvas id="myCanvas" width="1024" height="1024">
+    <div style="position: absolute;left: 150px;top:0px">
+<canvas id="myCanvas" width="1440" height="950">
     贺子华是个小菜B
 </canvas>
     </div>
@@ -54,37 +63,22 @@
     <li class="" data-type = 'or'><em  ></em><a href="javascript:;">或者</a></li>
 </ul>
 <ul id="menu_condition" class="menu"  style="visibility: hidden; background: silver;">
-    <li class="" data-type = 'education'><em  ></em><a href="javascript:;">学历</a></li>
-    <li class="" data-type = 'age'><em  ></em><a href="javascript:;">年龄</a></li>
-    <li class="" data-type = 'sex'><em  ></em><a href="javascript:;">性别</a></li>
+
 </ul>
 
 <ul id="menu_compare" class="menu"  style="visibility: hidden; background: silver;">
-    <li class="" data-type = 'greater'><em  ></em><a href="javascript:;">大于</a></li>
-    <li class="" data-type = 'equal'><em  ></em><a href="javascript:;">等于</a></li>
-    <li class="" data-type = 'less'><em  ></em><a href="javascript:;">小于</a></li>
+
 </ul>
 
 <ul id="menu_result_education" class="menu"  style="visibility: hidden; background: silver;">
-    <li class="" data-type = 'dazhuan'><em  ></em><a href="javascript:;">大专</a></li>
-    <li class="" data-type = 'benke'><em  ></em><a href="javascript:;">本科</a></li>
-    <li class="" data-type = 'shuoshi'><em  ></em><a href="javascript:;">硕士</a></li>
-    <li class="" data-type = 'boshi'><em  ></em><a href="javascript:;">博士</a></li>
-    <li class="" data-type = 'nvboshi'><em  ></em><a href="javascript:;">女博士</a></li>
+
 </ul>
 
 <ul id="menu_result_age" class="menu"  style="visibility: hidden; background: silver;">
-    <li class="" data-type = 'age18'><em  ></em><a href="javascript:;">18</a></li>
-    <li class="" data-type = 'age20'><em  ></em><a href="javascript:;">20</a></li>
-    <li class="" data-type = 'age25'><em  ></em><a href="javascript:;">25</a></li>
-    <li class="" data-type = 'age30'><em  ></em><a href="javascript:;">30</a></li>
-    <li class="" data-type = 'age40'><em  ></em><a href="javascript:;">40</a></li>
-    <li class="" data-type = 'age50'><em  ></em><a href="javascript:;">50</a></li>
+
 </ul>
 <ul id="menu_result_sex" class="menu"  style="visibility: hidden; background: silver;">
-    <li class="" data-type = 'man'><em  ></em><a href="javascript:;">男</a></li>
-    <li class="" data-type = 'woman'><em  ></em><a href="javascript:;">女</a></li>
-    <li class="" data-type = 'hzh'><em  ></em><a href="javascript:;">贺子华</a></li>
+
 </ul>
 </body>
 </html>

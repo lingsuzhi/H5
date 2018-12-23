@@ -1,5 +1,4 @@
 var cvs = new LszCanvans("myCanvas");
-// cvs.pushImg("1.jpg")
 
 cvs.pushObj(cvs.objSelect.type, {
     left: cvs.objLeft,
@@ -12,11 +11,13 @@ cvs.refresh();
 function btn1() {
     cvs.refresh();
 }
-
+function addFlower(src){
+    cvs.appendImgDo(src);
+}
 function showJson() {
     layer.open({
         type: 2,
-        title: '查看0.0',
+        title: '0.0查看Json',
         shadeClose: true,
         shade: 0.5,
         area: ['70%', '90%'],
@@ -200,8 +201,8 @@ EventUtil.addHandler(document.getElementById('myCanvas'), "click", function (eve
         let htmlStr = '';
         let domId = "menu_" + obj.type;
         if ("condition" == obj.type) {
-            if (event.clientX > (obj.left + cvs.objCondition.wid1)) {
-                if (event.clientX > (obj.left + cvs.objCondition.wid1 + cvs.objCondition.wid2)) {
+            if (event.layerX > (obj.left + cvs.objCondition.wid1)) {
+                if (event.layerX > (obj.left + cvs.objCondition.wid1 + cvs.objCondition.wid2)) {
 
                     if (conditionJson && conditionJson.length) {
                         for (let con of conditionJson) {
@@ -245,6 +246,7 @@ EventUtil.addHandler(document.getElementById('myCanvas'), "click", function (eve
             if (htmlStr) {
                 menu.innerHTML = htmlStr;
             }
+            //client  这里
             menu.setAttribute("data-id", obj.id);
             menu.style.left = event.clientX + "px";
             menu.style.top = event.clientY + "px";

@@ -125,10 +125,10 @@
     //(1)创建json格式或者从后台拿到对应的json格式
     //var originalJson = {"name": "binginsist", "sex": "男", "age": "25"};
     //下面用一个真实的json数据做测试
-    var originalJson = '[{"type":"select","children":[{"type":"condition"},{"type":"condition"}]}]'
+   // var originalJson = '[{"type":"select","children":[{"type":"condition"},{"type":"condition"}]}]'
 
     //(2)调用formatJson函数,将json格式进行格式化
-    var resultJson = formatJson(originalJson);
+   // var resultJson = formatJson(originalJson);
     //(3)将格式化好后的json写入页面中
    // document.getElementById("writePlace").innerHTML = '<pre>' +resultJson + '<pre/>';
 
@@ -142,7 +142,6 @@
             typeof obj === 'object' &&  typeof obj.length === 'number' && !(obj.propertyIsEnumerable('length'));
     }
     function Process(json) {
-        console.log(json);
         document.getElementById("Canvas").style.display = "block";
         var html = "";
         try {

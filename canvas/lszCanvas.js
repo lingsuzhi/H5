@@ -24,21 +24,32 @@ function LszCanvans(canvansId) {
     me.objSpaceHei = 5;
     //js 就是好，变量都不需要声明，直接用
     me.objArr = [];
-    me.width = 1024;
-    me.height = 1024;
+    me.width = 1440;
+    me.height = 950;
     me.draw = {
         type: ''
     };
-
+    me.appendImgDo = function (src) {
+        me.appendImg = canvasUtil.loadImg(src);
+        me.canvansDom.style.cursor = 'crosshair';
+    }
     me.setDraw = function (type) {
         me.draw.type = type;
         me.canvansDom.style.cursor = 'crosshair';
     }
     //鼠标矩形
     me.mouseRectDraw = function (ctx) {
+        if (me.appendImg) {
+
+            if (me.appendImg.width) {
+                ctx.drawImage(me.appendImg, me.mouseRect.x2 - me.appendImg.width / 2, me.mouseRect.y2 - me.appendImg.height / 2)
+            }
+
+            return true;
+        }
         if (me.mouseRect.show) {
-            ctx.setLineDash([6,4]);
-            var rect = me.mouseRect.getRect();
+            ctx.setLineDash([6, 4]);
+            let rect = me.mouseRect.getRect();
             ctx.strokeRect(rect.left, rect.top, rect.wid, rect.hei);
         }
     }
@@ -84,8 +95,7 @@ function LszCanvans(canvansId) {
             sort: me.objArr.length + 1
         }, me.objArr)
     }
-    me.pushImg = function (url, left, top) {
-        var img = canvasUtil.loadImg(url);
+    me.pushImg = function (img, left, top) {
         if (!left) {
             left = 0;
         }
@@ -101,6 +111,10 @@ function LszCanvans(canvansId) {
             sort: me.objArr.length + 1
         }, me.objArr)
     }
+    me.pushImgByUrl = function (url, left, top) {
+        var img = canvasUtil.loadImg(url);
+        me.pushImg(img, left, top);
+    }
     me.buff = newCtx(me.width, me.height);
 
     me.refresh = function () {
@@ -108,7 +122,7 @@ function LszCanvans(canvansId) {
         me.buff.clearRect(0, 0, me.width, me.height);
         me.refreshEx(me.objArr);
         me.mouseRectDraw(me.buff);
-       // drawLine(me.buff, 10, 10, 100, 100);
+        // drawLine(me.buff, 10, 10, 100, 100);
         let imgData = me.buff.getImageData(0, 0, me.width, me.height);
         me.ctx.putImageData(imgData, 0, 0);
     }
@@ -126,15 +140,15 @@ function LszCanvans(canvansId) {
                     obj.top = me.refreshHei;
                     me.refreshHei = me.refreshHei + obj.hei + me.objSpaceHei;
 
-                    let lineX = parent.left + parent.wid  / 2;
-                    let lineY2 = me.refreshHei - parent.hei  /2 - 3;
+                    let lineX = parent.left + parent.wid / 2;
+                    let lineY2 = me.refreshHei - parent.hei / 2 - 3;
                     let color = '#5FB878';
-                    if (parent.data.leftType == 'and'){
+                    if (parent.data.leftType == 'and') {
                         color = '#FF5722'
                     }
-                    drawLine(me.buff, lineX , parent.top+ parent.hei + 1,lineX, lineY2,color);
+                    drawLine(me.buff, lineX, parent.top + parent.hei + 1, lineX, lineY2, color);
 
-                    drawLine(me.buff,lineX,lineY2,obj.left,lineY2,color);
+                    drawLine(me.buff, lineX, lineY2, obj.left, lineY2, color);
                 } else {
                     me.refreshHei = obj.top + obj.hei;
                 }
@@ -152,7 +166,6 @@ function LszCanvans(canvansId) {
                     me.refreshEx(obj.children, obj);
 
 
-
                 }
 
 
@@ -161,7 +174,7 @@ function LszCanvans(canvansId) {
         }
     }
     me.canvansDom.onmousedown = function (e) {
-        if (e.button = 1) {
+        if (e.buttons == 1) {
             //左键
             me.mouseRect.show = true;
             me.mouseRect.x1 = e.layerX;
@@ -203,9 +216,11 @@ function LszCanvans(canvansId) {
         return false;
     }
     me.canvansDom.onmousemove = function (e) {
-        if (e.button = 1) {
+
+
+        if (e.buttons == 1) {
             //左键
-            if (me.mouseRect.show) {
+            if (me.mouseRect.show || me.appendImg) {
                 me.mouseRect.x2 = e.layerX;
                 me.mouseRect.y2 = e.layerY;
 
@@ -235,8 +250,8 @@ function LszCanvans(canvansId) {
         }
     }
 
-    function drawLine(ctx, x, y, x2, y2,color) {
-        if (!color){
+    function drawLine(ctx, x, y, x2, y2, color) {
+        if (!color) {
             color = '#ccc';
         }
         ctx.setLineDash([5]);
@@ -268,20 +283,30 @@ function LszCanvans(canvansId) {
     me.canvansDom.onmouseup = function (e) {
         let x = e.layerX;
         let y = e.layerY;
-        if (e.button = 1) {
-            //左键
-            me.mouseRect.show = false;
-            if (me.draw.type == 'rect') {
 
-                var rect = me.mouseRect.getRect();
-                me.pushObj(me.draw.type, rect);
-            } else if (me.draw.type == '') {
-                findObj(x, y, me.objArr);
-            }
-            me.refresh();
-            me.draw.type = '';
-            me.canvansDom.style.cursor = 'default';
+        // if (e.button == 2) {
+        //     return;
+        //     //右键
+        // }
+        //左键
+        me.mouseRect.show = false;
+        if (me.draw.type == 'rect') {
+
+            var rect = me.mouseRect.getRect();
+            me.pushObj(me.draw.type, rect);
+        } else if (me.draw.type == '') {
+            findObj(x, y, me.objArr);
         }
+        me.refresh();
+        me.draw.type = '';
+        if (me.appendImg) {
+            me.pushImg(me.appendImg, x - me.appendImg.width / 2, y - me.appendImg.height / 2)
+
+
+            me.appendImg = false;
+        }
+        me.canvansDom.style.cursor = 'default';
+
     }
 
     //条件
@@ -313,9 +338,11 @@ function LszCanvans(canvansId) {
             drawText(obj.data.resultText, ctx, rect);
         }
     }
-    function drawRect(obj){
+
+    function drawRect(obj) {
         drawSelect(obj);
     }
+
     //联合条件
     function drawSelect(obj) {
         let ctx = me.buff;
@@ -357,9 +384,9 @@ function LszCanvans(canvansId) {
             let json = {};
             let data = obj.data;
             json.type = obj.type;
-            json.text = data.text ;
+            json.text = data.text;
             json.leftType = data.leftType;
-            if (data.resultType){
+            if (data.resultType) {
                 json.resultType = data.resultType;
                 json.resultText = data.resultText;
                 json.optType = data.optType;
