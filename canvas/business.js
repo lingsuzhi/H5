@@ -13,6 +13,7 @@ function btn1() {
 }
 function addFlower(src){
     cvs.appendImgDo(src);
+
 }
 function showJson() {
     layer.open({
@@ -203,6 +204,16 @@ EventUtil.addHandler(document.getElementById('myCanvas'), "click", function (eve
     }
     let obj = cvs.findFocus(cvs.objArr);
     if (obj && obj.id) {
+
+        if (obj.type == 'img'){
+            if (obj.data.fanzhuan){
+                obj.data.fanzhuan = false;
+            } else{
+                obj.data.fanzhuan = true;
+            }
+            cvs.refresh();
+            return false;
+        }
         let htmlStr = '';
         let domId = "menu_" + obj.type;
         if ("condition" == obj.type) {
@@ -263,12 +274,15 @@ EventUtil.addHandler(document.getElementById('myCanvas'), "click", function (eve
 });
 
 $("#myCanvas").dblclick(function(){
+    let obj = cvs.findFocus(cvs.objArr);
+    if(obj && obj.type == 'rect'){
+        layer.open({
+            type: 2,
+            title: "0.0 满足前端一切需求~",
+            //    closeBtn: 0,
+            area: ['55%', '75%'],
+            content: 'edit.html'
+        });
 
-    layer.open({
-        type: 2,
-        title: "0.0 满足前端一切需求~",
-        //    closeBtn: 0,
-        area: ['55%', '75%'],
-        content: 'edit.html'
-    });
+    }
 });
