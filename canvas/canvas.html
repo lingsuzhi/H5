@@ -8,18 +8,73 @@
     <script src="canvasUtil.js"></script>
     <script src="lszCanvas.js"></script>
     <style type="text/css">
-        body,ul,li{margin:0;padding:0;}
-        body{font:12px/24px arial;}
-        .menu{position:absolute;top:-9999px;left:-9999px;width:130px;border-radius:3px;list-style-type:none;border:1px solid #8f8f8f;padding:2px;background:#fff;}
-        .menu li{position:relative;height:24px;padding-left:24px;background:#eaead7;vertical-align:top;}
-        .menu li a{display:block;color:#333;background:#fff;padding-left:5px;text-decoration:none; height: 100%; }
-        .menu li.active {background:#999;}
-        .menu li.active a{color:#fff;background:#8f8f8f;}
-        .menu li em{position:absolute;top:0;left:0;width:24px;height:24px;}
+        body, ul, li {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font: 12px/24px arial;
+        }
+
+        .menu {
+            position: absolute;
+            top: -9999px;
+            left: -9999px;
+            width: 130px;
+            border-radius: 3px;
+            list-style-type: none;
+            border: 1px solid #8f8f8f;
+            padding: 2px;
+            background: #fff;
+        }
+
+        .menu li {
+            position: relative;
+            height: 24px;
+            padding-left: 24px;
+            background: #eaead7;
+            vertical-align: top;
+        }
+
+        .menu li a {
+            display: block;
+            color: #333;
+            background: #fff;
+            padding-left: 5px;
+            text-decoration: none;
+            height: 100%;
+        }
+
+        .menu li.active {
+            background: #999;
+        }
+
+        .menu li.active a {
+            color: #fff;
+            background: #8f8f8f;
+        }
+
+        .menu li em {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 24px;
+            height: 24px;
+        }
+
         /*background:url(img/ico.png) no-repeat;*/
-        .menu li em.cut{background-position:0 0;}
-        .menu li em.copy{background-position:0 -24px;}
-        .menu li em.paste{background-position:0 -48px;}
+        .menu li em.cut {
+            background-position: 0 0;
+        }
+
+        .menu li em.copy {
+            background-position: 0 -24px;
+        }
+
+        .menu li em.paste {
+            background-position: 0 -48px;
+        }
     </style>
     <script src="../common/jquery.js"></script>
     <script src="layui/layui.all.js"></script>
@@ -32,59 +87,63 @@
     <div style="float:left;margin-top: 80px;margin-left: 80px">
 
         <div hidden>
-<input type="button" value="刷新" onclick="btn1()">
+            <input type="button" value="刷新" onclick="btn1()">
 
         </div>
 
 
-        <input  type="button" class="layui-btn layui-btn-radius " value="json格式" onclick="showJson()"/>
-        <br />
-        <input style="margin-top: 10px" type="button" class="layui-btn layui-btn-radius layui-btn-primary" value="小花花" onmousedown="addFlower('img/hh.jpg')"/>
+        <input type="button" class="layui-btn layui-btn-radius " value="json格式" onclick="showJson()"/>
         <br/>
-        <input style="margin-top: 10px" type="button" class="layui-btn layui-btn-radius layui-btn-primary" value="向日葵" onmousedown="addFlower('img/xrk.png')"/>
+        <input style="margin-top: 10px" type="button" class="layui-btn layui-btn-radius layui-btn-primary" value="小花花"
+               onmousedown="addFlower('img/hh.jpg')"/>
         <br/>
-        <input style="margin-top: 10px" type="button" class="layui-btn layui-btn-radius layui-btn-primary" value="小豌豆" onmousedown="addFlower('img/wdss.jpg')"/>
+        <input style="margin-top: 10px" type="button" class="layui-btn layui-btn-radius layui-btn-primary" value="向日葵"
+               onmousedown="addFlower('img/xrk.png')"/>
         <br/>
-        <input style="margin-top: 10px" type="button" class="layui-btn layui-btn-radius layui-btn-primary" value="小僵尸" onmousedown="addFlower('./img/jiangshi.png')"/>
+        <input style="margin-top: 10px" type="button" class="layui-btn layui-btn-radius layui-btn-primary" value="小豌豆"
+               onmousedown="addFlower('img/wdss.jpg')"/>
         <br/>
-        <input style="margin-top: 10px" type="button" class="layui-btn layui-btn-radius layui-btn-primary" value="文本框" onmousedown="drawDo('rect')"/>
+        <input style="margin-top: 10px" type="button" class="layui-btn layui-btn-radius layui-btn-primary" value="小僵尸"
+               onmousedown="addFlower('./img/jiangshi.png')"/>
+        <br/>
+        <input style="margin-top: 10px" type="button" class="layui-btn layui-btn-radius layui-btn-primary" value="文本框"
+               onmousedown="drawDo('rect')"/>
 
     </div>
     <div style="position: absolute;left: 150px;top:0px">
-<canvas id="myCanvas" width="1440" height="950">
-    贺子华是个小菜B
-</canvas>
+        <canvas id="myCanvas" width="1440" height="950">
+            贺子华是个小菜B
+        </canvas>
     </div>
 </div>
-<ul id="menuAdd" class="menu" style="visibility: hidden; background: silver;">
+<ul id="menu_add" class="menu" style="visibility: hidden; background: silver;">
 
-    <li class="" data-type = 'condition'><em  ></em><a href="javascript:;">添加条件</a></li>
-    <li class="" data-type = 'unionCondition'><em  ></em><a href="javascript:;">添加联合条件</a></li>
-
+    <li class="" data-type='condition'><em></em><a href="javascript:;">添加条件</a></li>
+    <li class="" data-type='unionCondition'><em></em><a href="javascript:;">添加联合条件</a></li>
+    <li class="" data-type='complex'><em></em><a href="javascript:;">添加复合条件</a></li>
 </ul>
 
-<ul id="menu_select" class="menu"  style="visibility: hidden; background: silver;">
-    <li class="" data-type = 'and'><em  ></em><a href="javascript:;">并且</a></li>
-    <li class="" data-type = 'or'><em  ></em><a href="javascript:;">或者</a></li>
-    <li class="" data-type = 'kill'><em  ><i class="layui-icon" style="font-size: 20px; margin-left: 2px; color: #FF8888;">&#x1007;</i></em><a href="javascript:;">删除</a></li>
+<ul id="menu_select" class="menu" style="visibility: hidden; background: silver;">
+    <li class="" data-type='and'><em></em><a href="javascript:;">并且</a></li>
+    <li class="" data-type='or'><em></em><a href="javascript:;">或者</a></li>
+    <li class="" data-type='kill'><em><i class="layui-icon" style="font-size: 20px; margin-left: 2px; color: #FF8888;">&#x1007;</i></em><a
+            href="javascript:;">删除</a></li>
 </ul>
-<ul id="menu_condition" class="menu"  style="visibility: hidden; background: silver;">
-
-</ul>
-
-<ul id="menu_compare" class="menu"  style="visibility: hidden; background: silver;">
+<ul id="menu_condition" class="menu" style="visibility: hidden; background: silver;">
 
 </ul>
-
-<ul id="menu_result_education" class="menu"  style="visibility: hidden; background: silver;">
-
+<ul id="menu_opt" class="menu" style="visibility: hidden; background: silver;">
+    <li class="" data-type='opt_add'><em></em><a href="javascript:;">相加</a></li>
+    <li class="" data-type='opt_sub'><em></em><a href="javascript:;">相减</a></li>
+    <li class="" data-type='opt_mul'><em></em><a href="javascript:;">相乘</a></li>
+    <li class="" data-type='opt_div'><em></em><a href="javascript:;">相除</a></li>
 </ul>
-
-<ul id="menu_result_age" class="menu"  style="visibility: hidden; background: silver;">
-
+<ul id="menu_complex" class="menu" style="visibility: hidden; background: silver;">
+<!--写这个方便以后改样式-->
 </ul>
-<ul id="menu_result_sex" class="menu"  style="visibility: hidden; background: silver;">
+<ul id="menu_complex_add" class="menu" style="visibility: hidden; background: silver;">
 
+    <li class="" data-type='complex_add'><em></em><a href="javascript:;">添加复合条件</a></li>
 </ul>
 </body>
 </html>

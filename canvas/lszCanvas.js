@@ -5,6 +5,11 @@ function LszCanvans(canvansId) {
     me.ctx = me.canvansDom.getContext("2d");
     me.objLeft = 50;
 
+    me.objComplex = {
+        wid: 300,
+        hei: 30,
+        type: 'complex'
+    }
     me.objSelect = {
         wid: 80,
         hei: 30,
@@ -15,9 +20,9 @@ function LszCanvans(canvansId) {
         hei: 30,
         type: 'condition'
     };
-    me.objCondition.wid1 = me.objCondition.wid / 5 * 2 - 2;
-    me.objCondition.wid2 = me.objCondition.wid / 5 * 1 + 5;
-    me.objCondition.wid3 = me.objCondition.wid / 5 * 2 - 2;
+    me.objCondition.wid1 = 110;
+    me.objCondition.wid2 = 80;
+    me.objCondition.wid3 = 110;
 
     me.objTop = 50;
     me.objSpaceWid = 6;
@@ -176,6 +181,8 @@ function LszCanvans(canvansId) {
                 } else if (obj.type == 'condition') {
                     //条件
                     drawCondition(obj);
+                }else if(obj.type == 'complex'){
+                    drawComplex(obj);
                 } else if (obj.type == 'rect') {
                     drawRect(obj);
                 }
@@ -339,6 +346,60 @@ function LszCanvans(canvansId) {
 
     }
 
+    function drawComplex(obj) {
+        //  有个list 对象
+        let ctx = me.buff;
+        let rect = {
+            left: obj.left,
+            top: obj.top,
+            wid: me.objCondition.wid1,
+            hei: obj.hei
+        };
+        ctx.fillStyle = "#EEEE66";
+        ctx.fillRect(rect.left, rect.top, rect.wid, rect.hei);
+        drawText(obj.data.text, ctx, rect);
+        if (obj.data.list){
+            let list  = obj.data.list;
+            let left = obj.left + rect.wid;
+            let otpWid = me.objCondition.wid2;
+            let valWid = me.objCondition.wid1;
+            let rectTmp = {
+                left: rect.left,
+                top: rect.top,
+                wid: rect.wid,
+                hei: rect.hei
+            };
+            for (let item of list){
+                ctx.fillStyle = "#339933";
+                rectTmp.left = left;
+                rectTmp.wid = otpWid;
+                ctx.fillRect(rectTmp.left, rectTmp.top, rectTmp.wid, rectTmp.hei);
+                drawText(item.optText, ctx, rectTmp);
+
+                ctx.fillStyle = "#EEEE66";
+                left = left+ rectTmp.wid;
+                rectTmp.left = left;
+                rectTmp.wid = valWid;
+                ctx.fillRect(rectTmp.left, rectTmp.top, rectTmp.wid, rectTmp.hei);
+                drawText(item.text, ctx, rectTmp);
+                left = left+ rectTmp.wid;
+            }
+        }
+
+
+
+        rect.left = obj.left + obj.wid - me.objCondition.wid2 - me.objCondition.wid3;
+        rect.wid = me.objCondition.wid2;
+        ctx.fillStyle = "#99EE99";
+        ctx.fillRect(rect.left, rect.top, rect.wid, rect.hei);
+        drawText(obj.data.optText, ctx, rect);
+//最后
+        rect.left = obj.left + obj.wid  - me.objCondition.wid3;
+        rect.wid = me.objCondition.wid3;
+        ctx.fillStyle = "#EEEEEE";
+        ctx.fillRect(rect.left, rect.top, rect.wid, rect.hei);
+        drawText(obj.data.resultText, ctx, rect);
+    }
     //条件
     function drawCondition(obj) {
         let ctx = me.buff;

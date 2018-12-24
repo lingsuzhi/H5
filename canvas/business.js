@@ -11,10 +11,12 @@ cvs.refresh();
 function btn1() {
     cvs.refresh();
 }
-function addFlower(src){
+
+function addFlower(src) {
     cvs.appendImgDo(src);
 
 }
+
 function showJson() {
     layer.open({
         type: 2,
@@ -59,7 +61,7 @@ function menuClick(id, type, item) {
         obj.data.text = '或者';
         obj.data.leftType = type;
     } else if (type == 'kill') {
-        if(obj.id != 1){
+        if (obj.id != 1) {
             obj.state = 'kill';
         }
 
@@ -67,6 +69,15 @@ function menuClick(id, type, item) {
         cvs.pushObjByParent(id, cvs.objCondition)
     } else if (type == 'unionCondition') {
         cvs.pushObjByParent(id, cvs.objSelect)
+    } else if (type == 'complex') {
+        cvs.pushObjByParent(id, cvs.objComplex)
+    } else if (type == 'complex_add') {
+        if (!obj.data.list) {
+            obj.data.list = [];
+        }
+        let list = obj.data.list;
+        list.push({});
+        obj.wid = obj.wid + cvs.objCondition.wid1 + cvs.objCondition.wid2;
     } else {
         let pos = item.attr("data-pos");
         let text = item.attr("data-text");
@@ -93,15 +104,19 @@ EventUtil.addHandler(document.getElementById("myCanvas"), "contextmenu", functio
     }
     let obj = cvs.findFocus(cvs.objArr);
     if (obj && obj.id) {
-
+        let domId = '';
         if (obj.type == 'select') {
-            var menu = document.getElementById("menuAdd");
-            menu.setAttribute("data-id", obj.id);
-            menu.style.left = event.clientX + "px";
-            menu.style.top = event.clientY + "px";
-            menu.style.visibility = "visible";
+            domId = 'menu_add';
 
+        } else if (obj.type == 'complex') {
+            domId = 'menu_complex_add'
         }
+
+        var menu = document.getElementById(domId);
+        menu.setAttribute("data-id", obj.id);
+        menu.style.left = event.clientX + "px";
+        menu.style.top = event.clientY + "px";
+        menu.style.visibility = "visible";
     }
 
     //  console.log("右键菜单");
@@ -205,10 +220,10 @@ EventUtil.addHandler(document.getElementById('myCanvas'), "click", function (eve
     let obj = cvs.findFocus(cvs.objArr);
     if (obj && obj.id) {
 
-        if (obj.type == 'img'){
-            if (obj.data.fanzhuan){
+        if (obj.type == 'img') {
+            if (obj.data.fanzhuan) {
                 obj.data.fanzhuan = false;
-            } else{
+            } else {
                 obj.data.fanzhuan = true;
             }
             cvs.refresh();
@@ -233,7 +248,48 @@ EventUtil.addHandler(document.getElementById('myCanvas'), "click", function (eve
                         }
                     }
 
-                } else if (conditionJson && conditionJson.length) {
+                } else {
+                    if (conditionJson && conditionJson.length) {
+                        for (let con of conditionJson) {
+                            if (con.code == obj.data.leftType) {
+                                if (con.compare && con.compare.length) {
+                                    for (let comp of con.compare) {
+                                        htmlStr += getLiHtml(comp, 'mid');
+                                    }
+                                }
+                                break;
+                            }
+                        }
+                    }
+                }
+            } else {
+                if (conditionJson && conditionJson.length) {
+                    for (let comp of conditionJson) {
+                        htmlStr += getLiHtml(comp, 'left');
+
+                    }
+                    htmlStr += `<li onclick="liClick(this)" class="" data-type = 'kill' ><em  ><i class="layui-icon" style="font-size: 20px; margin-left: 2px; color: #FF8888;">&#x1007;</i></em><a href="javascript:;">删除</a></li>`
+                }
+            }
+
+
+        } else if ('complex' == obj.type) {
+            if (event.layerX > (obj.left + obj.wid - cvs.objCondition.wid3)) {
+
+                if (conditionJson && conditionJson.length) {
+                    for (let con of conditionJson) {
+                        if (con.code == obj.data.leftType) {
+                            if (con.result && con.result.length) {
+                                for (let comp of con.result) {
+                                    htmlStr += getLiHtml(comp, 'right');
+                                }
+                            }
+                            break;
+                        }
+                    }
+                }
+            } else if (event.layerX > (obj.left + obj.wid - cvs.objCondition.wid2 - cvs.objCondition.wid3)) {
+                if (conditionJson && conditionJson.length) {
                     for (let con of conditionJson) {
                         if (con.code == obj.data.leftType) {
                             if (con.compare && con.compare.length) {
@@ -246,16 +302,22 @@ EventUtil.addHandler(document.getElementById('myCanvas'), "click", function (eve
                     }
                 }
             } else {
+
+                //复合 这里要算出 点的是哪个节点
+                if (obj.data.list && event.layerX > (obj.left + cvs.objCondition.wid1)) {
+                    let list = obj.data.list;
+                    for (let item of list){
+                        //////////////////////////////////
+                    }
+                }
                 if (conditionJson && conditionJson.length) {
                     for (let comp of conditionJson) {
                         htmlStr += getLiHtml(comp, 'left');
 
                     }
-                    htmlStr +=  `<li onclick="liClick(this)" class="" data-type = 'kill' ><em  ><i class="layui-icon" style="font-size: 20px; margin-left: 2px; color: #FF8888;">&#x1007;</i></em><a href="javascript:;">删除</a></li>`
+                    htmlStr += `<li onclick="liClick(this)" class="" data-type = 'kill' ><em  ><i class="layui-icon" style="font-size: 20px; margin-left: 2px; color: #FF8888;">&#x1007;</i></em><a href="javascript:;">删除</a></li>`
                 }
             }
-
-
         }
 
         var menu = document.getElementById(domId);
@@ -273,9 +335,9 @@ EventUtil.addHandler(document.getElementById('myCanvas'), "click", function (eve
     }
 });
 
-$("#myCanvas").dblclick(function(){
+$("#myCanvas").dblclick(function () {
     let obj = cvs.findFocus(cvs.objArr);
-    if(obj && obj.type == 'rect'){
+    if (obj && obj.type == 'rect') {
         layer.open({
             type: 2,
             title: "0.0 满足前端一切需求~",
