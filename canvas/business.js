@@ -315,15 +315,6 @@ EventUtil.addHandler(document.getElementById('myCanvas'), "click", function (eve
     let obj = cvs.findFocus(cvs.objArr);
     if (obj && obj.id) {
     let menuJson = conditionJson;
-        if (obj.type == 'img') {
-            if (obj.data.fanzhuan) {
-                obj.data.fanzhuan = false;
-            } else {
-                obj.data.fanzhuan = true;
-            }
-            cvs.refresh();
-            return false;
-        }
         let htmlStr = '';
         let domId = "menu_" + obj.type;
         if ("condition" == obj.type) {

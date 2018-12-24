@@ -115,7 +115,7 @@ function LszCanvans(canvansId) {
             sort: me.objArr.length + 1
         }, me.objArr)
     }
-    me.pushImg = function (img, left, top) {
+    me.pushImg = function (img, left, top, allowMove) {
 
         if (!left) {
             left = 0;
@@ -128,6 +128,7 @@ function LszCanvans(canvansId) {
             data: img,
             left: left,
             top: top,
+            allowMove: allowMove,
             wid: img.width,
             hei: img.height,
             focus: false,
@@ -189,17 +190,14 @@ function LszCanvans(canvansId) {
 
                     drawLine(me.buff, lineX, lineY2, obj.left, lineY2, color);
                 } else {
-                    if (obj.tagCode == 'success' || obj.tagCode =='fail') {
-                        if (obj.top < me.refreshHei+10){
+                    if (obj.tagCode == 'success' || obj.tagCode == 'fail') {
+                        if (obj.top < me.refreshHei + 10) {
                             obj.top = me.refreshHei + 50;
                         }
                     }
                     me.refreshHei = obj.top + obj.hei;
                 }
                 if (obj.type == "select") {
-
-
-
 
 
                     drawSelect(obj);
@@ -224,15 +222,32 @@ function LszCanvans(canvansId) {
 
         }
     }
+    me.moveObj = {};
     me.canvansDom.onmousedown = function (e) {
+        let x = e.offsetX;
+        let y = e.offsetY;
         if (e.buttons == 1) {
             //左键
             me.mouseRect.show = true;
-            me.mouseRect.x1 = e.layerX;
-            me.mouseRect.y1 = e.layerY;
+            me.mouseRect.x1 = x;
+            me.mouseRect.y1 = y;
 
             me.mouseRect.x2 = me.mouseRect.x1;
             me.mouseRect.y2 = me.mouseRect.y1;
+
+            let obj = me.findFocus(me.objArr);
+            if(obj && obj.allowMove == 'move'){
+                me.moveObj.id = obj.id;
+                me.moveObj.offX = x - obj.left;
+                me.moveObj.offY = y - obj.top;
+
+                if (me.moveObj.offX < 0 || me.moveObj.offY<0 || me.moveObj.offY > obj.hei || me.moveObj.offX > obj.wid){
+                    me.moveObj ={};
+
+                }else{
+                    me.mouseRect.show = false;
+                }
+            }
         }
     }
     me.findById = function (id, arr) {
@@ -274,15 +289,31 @@ function LszCanvans(canvansId) {
     }
     me.canvansDom.onmousemove = function (e) {
 
-
+        let x = e.offsetX;
+        let y = e.offsetY;
         if (e.buttons == 1) {
             //左键
             if (me.mouseRect.show || me.appendImg) {
-                me.mouseRect.x2 = e.layerX;
-                me.mouseRect.y2 = e.layerY;
+                me.mouseRect.x2 = x;
+                me.mouseRect.y2 = y;
+            }else{
+                if (me.moveObj){
+                    let tmpObj = me.findById(me.moveObj.id,me.objArr);
+                    if (tmpObj){
+                        tmpObj.left = x - me.moveObj.offX;
+                        tmpObj.top = y - me.moveObj.offY;
+                        if (tmpObj.left < 0 ){
+                            tmpObj.left = 0;
+                        }
+                        if (tmpObj.top < 0){
+                            tmpObj.top = 0;
+                        }
+                    }
 
-                me.refresh();
+                }
             }
+            me.refresh();
+
         }
     }
 
@@ -343,11 +374,22 @@ function LszCanvans(canvansId) {
     me.canvansDom.onmouseup = function (e) {
         let x = e.layerX;
         let y = e.layerY;
+        me.moveObj = {};
+        if (e.button == 2) {
+//右键
+            let obj = me.findFocus(me.objArr);
+            if (obj.type == 'img') {
+                if (obj.data.fanzhuan) {
+                    obj.data.fanzhuan = false;
+                } else {
+                    obj.data.fanzhuan = true;
+                }
+                cvs.refresh();
+                return false;
+            }
 
-        // if (e.button == 2) {
-        //     return;
-        //     //右键
-        // }
+
+        }
         //左键
         me.mouseRect.show = false;
         me.canvansDom.style.cursor = 'default';
@@ -377,7 +419,7 @@ function LszCanvans(canvansId) {
         me.refresh();
 
         if (me.appendImg) {
-            me.pushImg(me.appendImg, x - me.appendImg.width / 2, y - me.appendImg.height / 2)
+            me.pushImg(me.appendImg, x - me.appendImg.width / 2, y - me.appendImg.height / 2,'move')
 
             me.appendImg = false;
             findObj(x, y, me.objArr);
@@ -537,12 +579,12 @@ function LszCanvans(canvansId) {
         let tmpJson = toJsonEx(me.objArr, json);
 
         let newJson = {};
-        if (tmpJson){
-            for (let item of tmpJson){
-                if (item.tagCode ){
+        if (tmpJson) {
+            for (let item of tmpJson) {
+                if (item.tagCode) {
 
                     newJson[item.tagCode] = item;
-                   delete  item.tagCode
+                    delete  item.tagCode
                 }
             }
         }
