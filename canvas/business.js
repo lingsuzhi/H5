@@ -65,6 +65,9 @@ function menuClick(id, type, item) {
             obj.state = 'kill';
         }
 
+        // } else if (type == 'opt_add' || (type == 'opt_sub') || (type == 'opt_div') || (type == 'opt_mul')) {
+        //
+
     } else if (type == 'condition') {
         cvs.pushObjByParent(id, cvs.objCondition)
     } else if (type == 'unionCondition') {
@@ -79,8 +82,26 @@ function menuClick(id, type, item) {
         list.push({});
         obj.wid = obj.wid + cvs.objCondition.wid1 + cvs.objCondition.wid2;
     } else {
-        let pos = item.attr("data-pos");
+
+        let optpos = item.parent().attr("data-optpos");
+        let opttype = item.parent().attr("data-opttype");
         let text = item.attr("data-text");
+        if (optpos && opttype && obj.data.list) {
+            let item = obj.data.list[optpos - 1];
+            if (item) {
+                if (opttype == 'left') {
+                    item.optText = text;
+                    item.optType = type;
+                } else {
+                    item.text = text;
+                    item.type = type;
+                }
+                return false;
+
+            }
+        }
+
+        let pos = item.attr("data-pos");
         if (pos == 'left') {
             obj.data.text = text;
             obj.data.leftType = type;
@@ -219,7 +240,8 @@ EventUtil.addHandler(document.getElementById('myCanvas'), "click", function (eve
     }
     let obj = cvs.findFocus(cvs.objArr);
     if (obj && obj.id) {
-
+        let optpos = 0;
+        let opttype = '';
         if (obj.type == 'img') {
             if (obj.data.fanzhuan) {
                 obj.data.fanzhuan = false;
@@ -306,16 +328,54 @@ EventUtil.addHandler(document.getElementById('myCanvas'), "click", function (eve
                 //复合 这里要算出 点的是哪个节点
                 if (obj.data.list && event.layerX > (obj.left + cvs.objCondition.wid1)) {
                     let list = obj.data.list;
-                    for (let item of list){
+                    let i = 0;
+                    let left = obj.left + cvs.objCondition.wid1;
+
+                    for (let item of list) {
+                        i++; //从1开始
                         //////////////////////////////////
-                    }
-                }
-                if (conditionJson && conditionJson.length) {
-                    for (let comp of conditionJson) {
-                        htmlStr += getLiHtml(comp, 'left');
+                        let wid = cvs.objCondition.wid2;
+                        if (event.layerX < left + wid) {
+                            optpos = i;
+                            opttype = 'left';
+                            break;
+                        }
+                        left += wid;
+                        wid = cvs.objCondition.wid1;
+                        if (event.layerX < left + wid) {
+                            optpos = i;
+                            opttype = 'right';
+                            break;
+                        }
+                        left += wid;
 
                     }
-                    htmlStr += `<li onclick="liClick(this)" class="" data-type = 'kill' ><em  ><i class="layui-icon" style="font-size: 20px; margin-left: 2px; color: #FF8888;">&#x1007;</i></em><a href="javascript:;">删除</a></li>`
+
+                }
+
+                if (opttype == 'left') {
+                    domId = 'menu_opt';
+
+
+                } else {
+                    if (conditionJson && conditionJson.length) {
+                        for (let comp of conditionJson) {
+                            htmlStr += getLiHtml(comp, 'left');
+
+                        }
+                        htmlStr += `<li onclick="liClick(this)" class="" data-type = 'kill' ><em  ><i class="layui-icon" style="font-size: 20px; margin-left: 2px; color: #FF8888;">&#x1007;</i></em><a href="javascript:;">删除</a></li>`
+                    }
+                }
+            }
+            if (domId) {
+                let menu = document.getElementById(domId);
+                menu.setAttribute("data-optpos", '');
+                menu.setAttribute("data-opttype", '');
+                if (optpos) {
+                    menu.setAttribute("data-optpos", optpos);
+                }
+                if (opttype) {
+                    menu.setAttribute("data-opttype", opttype);
                 }
             }
         }
