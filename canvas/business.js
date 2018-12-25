@@ -6,23 +6,23 @@ cvs.pushObj(cvs.objSelect.type, {
     wid: cvs.objSelect.wid,
     hei: cvs.objSelect.hei,
     tagCode: 'if',
-    tag: '假如'
+    tag: '如果：'
 });
 cvs.pushObj(cvs.objSelect.type, {
     left: cvs.objLeft,
-    top: 550,
+    top: 250,
     wid: cvs.objSelect.wid,
     hei: cvs.objSelect.hei,
     tagCode: 'success',
-    tag: '成功'
+    tag: '那么：'
 });
 cvs.pushObj(cvs.objSelect.type, {
     left: cvs.objLeft,
-    top: 750,
+    top: 400,
     wid: cvs.objSelect.wid,
     hei: cvs.objSelect.hei,
     tagCode: 'fail',
-    tag: '失败'
+    tag: '否则：'
 });
 cvs.refresh();
 

@@ -191,8 +191,8 @@ function LszCanvans(canvansId) {
                     drawLine(me.buff, lineX, lineY2, obj.left, lineY2, color);
                 } else {
                     if (obj.tagCode == 'success' || obj.tagCode == 'fail') {
-                        if (obj.top < me.refreshHei + 10) {
-                            obj.top = me.refreshHei + 50;
+                        if (obj.top < me.refreshHei + 50) {
+                            obj.top = me.refreshHei + 60;
                         }
                     }
                     me.refreshHei = obj.top + obj.hei;
@@ -542,12 +542,12 @@ function LszCanvans(canvansId) {
         }
         if (obj.tag) {
             let tmpRect = {
-                left: rect.left + rect.wid + 5,
-                top: rect.top,
+                left: rect.left  ,
+                top: rect.top - rect.hei,
                 wid: 60,
-                hei: rect.height
+                hei: rect.hei
             };
-            drawTextLeft(obj.tag, ctx, tmpRect, "#5FBB78");
+            drawTextLeft(obj.tag, ctx, tmpRect, "#5F8878");
         }
     }
 
@@ -561,12 +561,11 @@ function LszCanvans(canvansId) {
             ctx.fillText(text, rect.left + (rect.wid / 2), rect.top + 22);
         }
     }
-
     function drawTextLeft(text, ctx, rect, color) {
         if (text) {
             ctx.fillStyle = color;
 
-            ctx.font = "20px Arial";
+            ctx.font = "18px Arial";
             ctx.textAlign = 'left';
 
             ctx.fillText(text, rect.left, rect.top + 22);
@@ -584,7 +583,7 @@ function LszCanvans(canvansId) {
                 if (item.tagCode) {
                     if (item.tagCode == 'success'){
                         //他们要 than else
-                        newJson.than = item;
+                        newJson.then = item;
                     }else if(item.tagCode == 'fail'){
                         newJson.else = item;
                     }else{
