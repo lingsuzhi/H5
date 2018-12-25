@@ -5,8 +5,24 @@ cvs.pushObj(cvs.objSelect.type, {
     top: cvs.objTop,
     wid: cvs.objSelect.wid,
     hei: cvs.objSelect.hei,
-    tagCode:'if',
-    tag : '假如'
+    tagCode: 'if',
+    tag: '假如'
+});
+cvs.pushObj(cvs.objSelect.type, {
+    left: cvs.objLeft,
+    top: 550,
+    wid: cvs.objSelect.wid,
+    hei: cvs.objSelect.hei,
+    tagCode: 'success',
+    tag: '成功'
+});
+cvs.pushObj(cvs.objSelect.type, {
+    left: cvs.objLeft,
+    top: 750,
+    wid: cvs.objSelect.wid,
+    hei: cvs.objSelect.hei,
+    tagCode: 'fail',
+    tag: '失败'
 });
 cvs.refresh();
 
@@ -18,12 +34,15 @@ function addFlower(src) {
     cvs.appendImgDo(src);
 
 }
+
 function btnChenggong() {
-    cvs.setDrawEx("select",'成功','success');
+    cvs.setDrawEx("select", '成功', 'success');
 }
+
 function btnShibai() {
-    cvs.setDrawEx("select",'失败','fail');
+    cvs.setDrawEx("select", '失败', 'fail');
 }
+
 function showJson() {
     layer.open({
         type: 2,
@@ -86,8 +105,26 @@ function menuClick(id, type, item) {
         list.push({});
         obj.wid = obj.wid + cvs.objCondition.wid1 + cvs.objCondition.wid2;
     } else {
-        let pos = item.attr("data-pos");
+
+        let optpos = item.parent().attr("data-optpos");
+        let opttype = item.parent().attr("data-opttype");
         let text = item.attr("data-text");
+        if (optpos && opttype && obj.data.list) {
+            let item = obj.data.list[optpos - 1];
+            if (item) {
+                if (opttype == 'left') {
+                    item.optText = text;
+                    item.optType = type;
+                } else {
+                    item.text = text;
+                    item.type = type;
+                }
+                return false;
+
+            }
+        }
+
+        let pos = item.attr("data-pos");
         if (pos == 'left') {
             obj.data.text = text;
             obj.data.leftType = type;
@@ -118,7 +155,7 @@ EventUtil.addHandler(document.getElementById("myCanvas"), "contextmenu", functio
         } else if (obj.type == 'complex') {
             domId = 'menu_complex_add'
         }
-        if(domId){
+        if (domId) {
             var menu = document.getElementById(domId);
             menu.setAttribute("data-id", obj.id);
             menu.style.left = event.clientX + "px";
@@ -297,29 +334,33 @@ var thenJson = [{
 function getLiHtml(comp, pos) {
     return `<li onclick="liClick(this)" class="" data-type = '` + comp.code + `' data-text = '` + comp.text + `' data-pos = '` + pos + `'><em  ></em><a href="javascript:;">` + comp.text + `</a></li>\n`
 }
-function findObjParentRoot(obj){
- 
-    for (let i = 0; i < 100 ; i++){
-        if (obj && obj.parentId){
-            obj = cvs.findById(obj.parentId,cvs.objArr);
+
+function findObjParentRoot(obj) {
+
+    for (let i = 0; i < 100; i++) {
+        if (obj && obj.parentId) {
+            obj = cvs.findById(obj.parentId, cvs.objArr);
         }
-    } 
+    }
     return obj;
 
- 
+
 }
+
 EventUtil.addHandler(document.getElementById('myCanvas'), "click", function (event) {
     if (closeMenu()) {
         return false;
     }
     let obj = cvs.findFocus(cvs.objArr);
     if (obj && obj.id) {
-    let menuJson = conditionJson;
+        let optpos = 0;
+        let opttype = '';
+        let menuJson = conditionJson;
         let htmlStr = '';
         let domId = "menu_" + obj.type;
         if ("condition" == obj.type) {
             let rootObj = findObjParentRoot(obj);
-            if (rootObj && (rootObj.tagCode == 'success' || rootObj.tagCode == 'fail' )){
+            if (rootObj && (rootObj.tagCode == 'success' || rootObj.tagCode == 'fail' )) {
                 menuJson = thenJson;
             }
             if (event.layerX > (obj.left + cvs.objCondition.wid1)) {
@@ -396,16 +437,56 @@ EventUtil.addHandler(document.getElementById('myCanvas'), "click", function (eve
                 //复合 这里要算出 点的是哪个节点
                 if (obj.data.list && event.layerX > (obj.left + cvs.objCondition.wid1)) {
                     let list = obj.data.list;
-                    for (let item of list){
+                    let i = 0;
+                    let left = obj.left + cvs.objCondition.wid1;
+
+                    for (let item of list) {
+                        i++; //从1开始
                         //////////////////////////////////
-                    }
-                }
-                if (menuJson && menuJson.length) {
-                    for (let comp of menuJson) {
-                        htmlStr += getLiHtml(comp, 'left');
+                        let wid = cvs.objCondition.wid2;
+                        if (event.layerX < left + wid) {
+                            optpos = i;
+                            opttype = 'left';
+                            break;
+                        }
+                        left += wid;
+                        wid = cvs.objCondition.wid1;
+                        if (event.layerX < left + wid) {
+                            optpos = i;
+                            opttype = 'right';
+                            break;
+                        }
+                        left += wid;
 
                     }
-                    htmlStr += `<li onclick="liClick(this)" class="" data-type = 'kill' ><em  ><i class="layui-icon" style="font-size: 20px; margin-left: 2px; color: #FF8888;">&#x1007;</i></em><a href="javascript:;">删除</a></li>`
+
+                }
+
+                if (opttype == 'left') {
+                    domId = 'menu_opt';
+
+
+                } else {
+                    if (menuJson && menuJson.length) {
+                        for (let comp of menuJson) {
+                            htmlStr += getLiHtml(comp, 'left');
+
+                        }
+                        htmlStr += `<li onclick="liClick(this)" class="" data-type = 'kill' ><em  ><i class="layui-icon" style="font-size: 20px; margin-left: 2px; color: #FF8888;">&#x1007;</i></em><a href="javascript:;">删除</a></li>`
+                    }
+                }
+
+
+            }
+            if (domId) {
+                let menu = document.getElementById(domId);
+                menu.setAttribute("data-optpos", '');
+                menu.setAttribute("data-opttype", '');
+                if (optpos) {
+                    menu.setAttribute("data-optpos", optpos);
+                }
+                if (opttype) {
+                    menu.setAttribute("data-opttype", opttype);
                 }
             }
         }

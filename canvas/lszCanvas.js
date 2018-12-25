@@ -582,8 +582,15 @@ function LszCanvans(canvansId) {
         if (tmpJson) {
             for (let item of tmpJson) {
                 if (item.tagCode) {
+                    if (item.tagCode == 'success'){
+                        //他们要 than else
+                        newJson.than = item;
+                    }else if(item.tagCode == 'fail'){
+                        newJson.else = item;
+                    }else{
+                        newJson.if = item;
+                    }
 
-                    newJson[item.tagCode] = item;
                     delete  item.tagCode
                 }
             }
@@ -608,6 +615,10 @@ function LszCanvans(canvansId) {
                 json.optType = data.optType;
                 json.optText = data.optText;
             }
+            if(data.list){
+                json.lists = data.list;
+            }
+
             if (obj.children && obj.children.length) {
                 json.children = [];
                 toJsonEx(obj.children, json.children);
