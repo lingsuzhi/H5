@@ -42,7 +42,9 @@ function btnChenggong() {
 function btnShibai() {
     cvs.setDrawEx("select", '失败', 'fail');
 }
-
+function appendObj(code){
+    cvs.setDrawByCode(code)
+}
 function showJson() {
     layer.open({
         type: 2,
@@ -140,33 +142,6 @@ function menuClick(id, type, item) {
 
 }
 
-EventUtil.addHandler(document.getElementById("myCanvas"), "contextmenu", function (event) {
-    event = EventUtil.getEvent(event);
-    EventUtil.preventDefault(event);
-    if (closeMenu()) {
-        return false;
-    }
-    let obj = cvs.findFocus(cvs.objArr);
-    if (obj && obj.id) {
-        let domId = '';
-        if (obj.type == 'select') {
-            domId = 'menu_add';
-
-        } else if (obj.type == 'complex') {
-            domId = 'menu_complex_add'
-        }
-        if (domId) {
-            var menu = document.getElementById(domId);
-            menu.setAttribute("data-id", obj.id);
-            menu.style.left = event.clientX + "px";
-            menu.style.top = event.clientY + "px";
-            menu.style.visibility = "visible";
-
-        }
-    }
-
-    //  console.log("右键菜单");
-});
 
 function closeMenu() {
     let menuArr = document.getElementsByClassName("menu");
@@ -177,7 +152,9 @@ function closeMenu() {
         }
     }
 }
-
+document.oncontextmenu = function(){
+    return false;
+}
 var conditionJson = [{
     code: 'education',
     text: '学历',
@@ -347,165 +324,6 @@ function findObjParentRoot(obj) {
 
 }
 
-EventUtil.addHandler(document.getElementById('myCanvas'), "click", function (event) {
-    if (closeMenu()) {
-        return false;
-    }
-    let obj = cvs.findFocus(cvs.objArr);
-    if (obj && obj.id) {
-        let optpos = 0;
-        let opttype = '';
-        let menuJson = conditionJson;
-        let htmlStr = '';
-        let domId = "menu_" + obj.type;
-        if ("condition" == obj.type) {
-            let rootObj = findObjParentRoot(obj);
-            if (rootObj && (rootObj.tagCode == 'success' || rootObj.tagCode == 'fail' )) {
-                menuJson = thenJson;
-            }
-            if (event.layerX > (obj.left + cvs.objCondition.wid1)) {
-                if (event.layerX > (obj.left + cvs.objCondition.wid1 + cvs.objCondition.wid2)) {
-
-                    if (menuJson && menuJson.length) {
-                        for (let con of menuJson) {
-                            if (con.code == obj.data.leftType) {
-                                if (con.result && con.result.length) {
-                                    for (let comp of con.result) {
-                                        htmlStr += getLiHtml(comp, 'right');
-                                    }
-                                }
-                                break;
-                            }
-                        }
-                    }
-
-                } else {
-                    if (menuJson && menuJson.length) {
-                        for (let con of menuJson) {
-                            if (con.code == obj.data.leftType) {
-                                if (con.compare && con.compare.length) {
-                                    for (let comp of con.compare) {
-                                        htmlStr += getLiHtml(comp, 'mid');
-                                    }
-                                }
-                                break;
-                            }
-                        }
-                    }
-                }
-            } else {
-                if (menuJson && menuJson.length) {
-                    for (let comp of menuJson) {
-                        htmlStr += getLiHtml(comp, 'left');
-
-                    }
-                    htmlStr += `<li onclick="liClick(this)" class="" data-type = 'kill' ><em  ><i class="layui-icon" style="font-size: 20px; margin-left: 2px; color: #FF8888;">&#x1007;</i></em><a href="javascript:;">删除</a></li>`
-                }
-            }
-
-
-        } else if ('complex' == obj.type) {
-            if (event.layerX > (obj.left + obj.wid - cvs.objCondition.wid3)) {
-
-                if (menuJson && menuJson.length) {
-                    for (let con of menuJson) {
-                        if (con.code == obj.data.leftType) {
-                            if (con.result && con.result.length) {
-                                for (let comp of con.result) {
-                                    htmlStr += getLiHtml(comp, 'right');
-                                }
-                            }
-                            break;
-                        }
-                    }
-                }
-            } else if (event.layerX > (obj.left + obj.wid - cvs.objCondition.wid2 - cvs.objCondition.wid3)) {
-                if (menuJson && menuJson.length) {
-                    for (let con of menuJson) {
-                        if (con.code == obj.data.leftType) {
-                            if (con.compare && con.compare.length) {
-                                for (let comp of con.compare) {
-                                    htmlStr += getLiHtml(comp, 'mid');
-                                }
-                            }
-                            break;
-                        }
-                    }
-                }
-            } else {
-
-                //复合 这里要算出 点的是哪个节点
-                if (obj.data.list && event.layerX > (obj.left + cvs.objCondition.wid1)) {
-                    let list = obj.data.list;
-                    let i = 0;
-                    let left = obj.left + cvs.objCondition.wid1;
-
-                    for (let item of list) {
-                        i++; //从1开始
-                        //////////////////////////////////
-                        let wid = cvs.objCondition.wid2;
-                        if (event.layerX < left + wid) {
-                            optpos = i;
-                            opttype = 'left';
-                            break;
-                        }
-                        left += wid;
-                        wid = cvs.objCondition.wid1;
-                        if (event.layerX < left + wid) {
-                            optpos = i;
-                            opttype = 'right';
-                            break;
-                        }
-                        left += wid;
-
-                    }
-
-                }
-
-                if (opttype == 'left') {
-                    domId = 'menu_opt';
-
-
-                } else {
-                    if (menuJson && menuJson.length) {
-                        for (let comp of menuJson) {
-                            htmlStr += getLiHtml(comp, 'left');
-
-                        }
-                        htmlStr += `<li onclick="liClick(this)" class="" data-type = 'kill' ><em  ><i class="layui-icon" style="font-size: 20px; margin-left: 2px; color: #FF8888;">&#x1007;</i></em><a href="javascript:;">删除</a></li>`
-                    }
-                }
-
-
-            }
-            if (domId) {
-                let menu = document.getElementById(domId);
-                menu.setAttribute("data-optpos", '');
-                menu.setAttribute("data-opttype", '');
-                if (optpos) {
-                    menu.setAttribute("data-optpos", optpos);
-                }
-                if (opttype) {
-                    menu.setAttribute("data-opttype", opttype);
-                }
-            }
-        }
-
-        var menu = document.getElementById(domId);
-        if (menu) {
-            if (htmlStr) {
-                menu.innerHTML = htmlStr;
-            }
-            //client  这里
-            menu.setAttribute("data-id", obj.id);
-            menu.style.left = event.clientX + "px";
-            menu.style.top = event.clientY + "px";
-            menu.style.visibility = "visible";
-        }
-
-    }
-});
-
 $("#myCanvas").dblclick(function () {
     let obj = cvs.findFocus(cvs.objArr);
     if (obj && obj.type == 'rect') {
@@ -519,3 +337,63 @@ $("#myCanvas").dblclick(function () {
 
     }
 });
+
+function findMenuByCode(code){
+    if (code =='and'){
+        return {
+            code: code,
+            text: '并且'
+        }
+    } else if(code =='or'){
+        return {
+            code: code,
+            text: '或者'
+        }
+    }
+    let menuJson = conditionJson;
+    if (menuJson && menuJson.length) {
+        for (let con of menuJson) {
+            if (con.code == code) {
+                 return con;
+            }
+        }
+    }
+    return null;
+}
+
+$(window).keyup(function (event) {
+  if(event.keyCode == 17){
+      //ctrl
+      mergeObj();
+  }
+});
+
+function mergeObj() {
+    let count = cvs.findFocusCount();
+    if (count > 1){
+        layer.confirm('共选定：' + count +"条记录，请选择合并条件~"   , {
+            btn: ['并且','或者'] //按钮
+        }, function(index){
+            cvs.mergeObjDo('and')
+            layer.close(index);
+        }, function(index){
+            cvs.mergeObjDo('or')
+            layer.close(index);
+        });
+    }
+}
+
+var collideRect = function(rect1,rect2) {
+    var maxX,maxY,minX,minY
+
+    maxX = rect1.left+rect1.wid >= rect2.left+rect2.wid ? rect1.left+rect1.wid : rect2.left+rect2.wid
+    maxY = rect1.top+rect1.hei >= rect2.top+rect2.hei ? rect1.top+rect1.hei : rect2.top+rect2.hei
+    minX = rect1.left <= rect2.left ? rect1.left : rect2.left
+    minY = rect1.top <= rect2.top ? rect1.top : rect2.top
+
+    if(maxX - minX <= rect1.wid+rect2.wid && maxY - minY <= rect1.hei+rect2.hei){
+        return true
+    }else{
+        return false
+    }
+}

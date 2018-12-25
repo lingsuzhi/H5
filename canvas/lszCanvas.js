@@ -17,13 +17,13 @@ function LszCanvans(canvansId) {
         type: 'select'
     };
     me.objCondition = {
-        wid: 300,
+        wid: 260,
         hei: 30,
         type: 'condition'
     };
-    me.objCondition.wid1 = 110;
-    me.objCondition.wid2 = 80;
-    me.objCondition.wid3 = 110;
+    me.objCondition.wid1 = 100;
+    me.objCondition.wid2 = 60;
+    me.objCondition.wid3 = 100;
 
 
     me.objSpaceWid = 6;
@@ -50,6 +50,17 @@ function LszCanvans(canvansId) {
         me.setDraw(type, tag, tagCode);
         me.mouseRect.show = 2;
     }
+    me.setDrawByCode = function (code) {
+        let menuObj = findMenuByCode(code);
+        if (menuObj == null) {
+            return;
+        }
+        me.draw.code = code;
+        me.draw.type = 'custom';
+        me.draw.menuObj = menuObj;
+        me.canvansDom.style.cursor = 'all-scroll';
+        me.mouseRect.show = 3;
+    }
     //鼠标矩形
     me.mouseRectDraw = function (ctx) {
         if (me.appendImg) {
@@ -63,6 +74,20 @@ function LszCanvans(canvansId) {
         if (me.mouseRect.show) {
             if (me.draw.type == 'select') {
                 ctx.strokeRect(me.mouseRect.x2 - me.objSelect.wid / 2, me.mouseRect.y2 - me.objSelect.hei / 2, me.objSelect.wid, me.objSelect.hei);
+            } else if (me.draw.type == 'custom') {
+                ctx.strokeRect(me.mouseRect.x2 - me.objSelect.wid / 2, me.mouseRect.y2 - me.objSelect.hei / 2, me.objSelect.wid, me.objSelect.hei);
+                let text = me.draw.menuObj.text;
+                if (text) {
+
+                    let tmpRect = {
+                        left: me.mouseRect.x2 - me.objSelect.wid / 2,
+                        top: me.mouseRect.y2 - me.objSelect.hei / 2,
+                        wid: me.objSelect.wid,
+                        hei: me.objSelect.hei
+
+                    }
+                    drawText(text, ctx, tmpRect);
+                }
             } else {
                 ctx.setLineDash([6, 4]);
                 let rect = me.mouseRect.getRect();
@@ -94,6 +119,7 @@ function LszCanvans(canvansId) {
         obj.id = getNewId();
         obj.children = [];
         arr.push(obj);
+        return obj;
     }
 
     function getNewId() {
@@ -101,8 +127,17 @@ function LszCanvans(canvansId) {
         return me.outoId;
     }
 
+    me.pushSelect = function (x, y) {
+        let rect = {
+            left: x,
+            top: y,
+            wid: me.objSelect.wid,
+            hei: me.objSelect.hei
+        }
+        return me.pushObj(me.objSelect.type, rect);
+    }
     me.pushObj = function (type, rect) {
-        me.newObj({
+        return me.newObj({
             type: type,
             data: {},
             left: rect.left,
@@ -172,6 +207,7 @@ function LszCanvans(canvansId) {
 
 
             } else {
+
                 //初始化
                 obj.treeLeft = obj.left + obj.wid + me.objSpaceWid;
 
@@ -198,7 +234,7 @@ function LszCanvans(canvansId) {
                     me.refreshHei = obj.top + obj.hei;
                 }
                 if (obj.type == "select") {
-
+                    obj.treeLeft = obj.left + obj.wid + me.objSpaceWid;
 
                     drawSelect(obj);
                 } else if (obj.type == 'condition') {
@@ -209,7 +245,9 @@ function LszCanvans(canvansId) {
                 } else if (obj.type == 'rect') {
                     drawRect(obj);
                 }
-
+                if (obj.focus) {
+                    drawFocus(obj);
+                }
                 //递归
                 if (obj.children && obj.children.length) {
                     me.refreshEx(obj.children, obj);
@@ -236,15 +274,16 @@ function LszCanvans(canvansId) {
             me.mouseRect.y2 = me.mouseRect.y1;
 
             let obj = me.findFocus(me.objArr);
-            if(obj && obj.allowMove == 'move'){
+            if (obj && obj.allowMove == 'move') {
                 me.moveObj.id = obj.id;
                 me.moveObj.offX = x - obj.left;
                 me.moveObj.offY = y - obj.top;
+                me.moveObj.oldLeft = obj.left;
+                me.moveObj.oldTop = obj.top;
+                if (me.moveObj.offX < 0 || me.moveObj.offY < 0 || me.moveObj.offY > obj.hei || me.moveObj.offX > obj.wid) {
+                    me.moveObj = {};
 
-                if (me.moveObj.offX < 0 || me.moveObj.offY<0 || me.moveObj.offY > obj.hei || me.moveObj.offX > obj.wid){
-                    me.moveObj ={};
-
-                }else{
+                } else {
                     me.mouseRect.show = false;
                 }
             }
@@ -267,6 +306,37 @@ function LszCanvans(canvansId) {
             }
         }
         return false;
+    }
+    me.findFocusCount = function () {
+        let count = 0;
+        me.diguiFun(me.objArr, function (obj) {
+            if (obj.focus && !obj.parentId) {
+                count++
+            }
+        })
+        return count;
+    }
+    me.diguiFun = function (arr, fun) {
+        for (let obj of arr) {
+            if (obj.state == 'kill') {
+                continue;
+            }
+            fun(obj);
+            if (obj.children && obj.children.length) {
+                me.diguiFun(obj.children, fun);
+            }
+        }
+    }
+    me.diguiFunAndId = function (arr, id, fun) {
+        for (let obj of arr) {
+            if (obj.state == 'kill') {
+                continue;
+            }
+            fun(obj, id);
+            if (obj.children && obj.children.length) {
+                me.diguiFunAndId(obj.children, obj.id, fun);
+            }
+        }
     }
     me.findFocus = function (arr) {
         for (let obj of arr) {
@@ -296,16 +366,16 @@ function LszCanvans(canvansId) {
             if (me.mouseRect.show || me.appendImg) {
                 me.mouseRect.x2 = x;
                 me.mouseRect.y2 = y;
-            }else{
-                if (me.moveObj){
-                    let tmpObj = me.findById(me.moveObj.id,me.objArr);
-                    if (tmpObj){
+            } else {
+                if (me.moveObj) {
+                    let tmpObj = me.findById(me.moveObj.id, me.objArr);
+                    if (tmpObj) {
                         tmpObj.left = x - me.moveObj.offX;
                         tmpObj.top = y - me.moveObj.offY;
-                        if (tmpObj.left < 0 ){
+                        if (tmpObj.left < 0) {
                             tmpObj.left = 0;
                         }
-                        if (tmpObj.top < 0){
+                        if (tmpObj.top < 0) {
                             tmpObj.top = 0;
                         }
                     }
@@ -317,7 +387,23 @@ function LszCanvans(canvansId) {
         }
     }
 
-    function findObj(x, y, arr) {
+    function closeFocus(arr) {
+        for (let obj of arr) {
+            if (obj.state == 'kill') {
+                continue;
+            }
+
+            obj.focus = false;
+            //递归
+            if (obj.children && obj.children.length) {
+                closeFocus(obj.children);
+            }
+
+
+        }
+    }
+
+    function findObjByPos(x, y, arr) {
         for (let obj of arr) {
             if (obj.state == 'kill') {
                 continue;
@@ -325,20 +411,78 @@ function LszCanvans(canvansId) {
             if (obj.type == "img#") {
                 // img 也算
             } else {
-                //暂时不排序
-                obj.focus = false;
+
                 if (x > obj.left && x < (obj.left + obj.wid)
                     && y > obj.top && y < (obj.top + obj.hei)) {
-                    obj.focus = true;
-
+                    return obj;
                 }
+
                 //递归
                 if (obj.children && obj.children.length) {
-                    findObj(x, y, obj.children);
+                    let b = findObjByPos(x, y, obj.children);
+                    if (b) {
+                        return b;
+                    }
                 }
 
             }
         }
+        return false;
+    }
+
+    function setFocusByRect(mRect) {
+        if (mRect && mRect.hei) {
+            me.diguiFun(me.objArr, function (obj) {
+                if (collideRect(mRect, obj)) {
+                    obj.focus = true;
+                } else {
+                    obj.focus = false;
+                }
+            })
+        }
+        mergeObj();
+    }
+
+    me.mergeLeft = 800;
+    me.mergeTop = 100;
+
+    function sumHeight(arr) {
+        let sumHei = 0;
+        me.diguiFun(arr, function (obj) {
+            sumHei += obj.hei;
+        })
+        return sumHei;
+    }
+
+    me.mergeObjDo = function (code) {
+        let list = [];
+        me.diguiFun(me.objArr, function (obj) {
+            if (obj.focus && !obj.parentId) {
+                //let newObj = Object.assign({}, obj);
+                let newObj = JSON.parse(JSON.stringify(obj));
+
+                newObj.allowMove = '';
+                newObj.merge = true;
+                list.push(newObj);
+
+            }
+        })
+        let obj = me.pushSelect(me.mergeLeft, me.mergeTop);
+        if (obj) {
+            let menuObj = findMenuByCode(code);
+            if (menuObj) {
+                menuToObj(menuObj, obj);
+                obj.children = list;
+                let tmpHei = sumHeight(list)
+                me.mergeTop += tmpHei + 60;
+            }
+            // 很简单的逻辑
+            me.diguiFunAndId(list, obj.id, function (obj, id) {
+                obj.id = getNewId();
+                obj.parentId = id;
+            })
+        }
+        me.refresh()
     }
 
     function drawLine(ctx, x, y, x2, y2, color) {
@@ -368,12 +512,43 @@ function LszCanvans(canvansId) {
             focus: false,
             sort: parent.children.length + 1
         };
-        me.newObj(obj, parent.children);
+        return me.newObj(obj, parent.children);
 
     }
+
+    function menuToObj(menuObj, obj) {
+        obj.data.leftType = menuObj.code;
+        obj.data.text = menuObj.text;
+    }
+
     me.canvansDom.onmouseup = function (e) {
-        let x = e.layerX;
-        let y = e.layerY;
+        let ctrlDo = e.ctrlKey;
+        let x = e.offsetX;
+        let y = e.offsetY;
+        let focusObj = findObjByPos(x, y, me.objArr);
+
+        let showMenu = !closeMenu();
+
+        if (focusObj) {
+            let oldFocus = focusObj.focus;
+            showMenu = oldFocus && showMenu;
+            if (me.moveObj.id == focusObj.id) {
+                let moveSize = me.moveObj.oldLeft - focusObj.left;
+                if (moveSize < 0) {
+                    moveSize = -moveSize;
+                }
+                if (moveSize >= 5) {
+                    //top 就暂时不算了，心累
+                    showMenu = false;
+                }
+
+            }
+        }
+        if (!ctrlDo) {
+            closeFocus(me.objArr);
+        }
+
+        focusObj.focus = true;
         me.moveObj = {};
         if (e.button == 2) {
 //右键
@@ -385,26 +560,50 @@ function LszCanvans(canvansId) {
                     obj.data.fanzhuan = true;
                 }
                 cvs.refresh();
-                return false;
+                return;
             }
 
-
+            if (showMenu) {
+                me.menuRight(e);
+            }
+            return;
         }
         //左键
         me.mouseRect.show = false;
         me.canvansDom.style.cursor = 'default';
         if (!me.draw.type) {
-            findObj(x, y, me.objArr);
-        } else {
-            let rect = me.mouseRect.getRect();
-            if (me.draw.type == 'select') {
+            //选择
+            let mRect = me.mouseRect.getRect();
+            if (mRect.wid > 5) {
+                setFocusByRect(mRect);
+                showMenu = false;
+            }
+        } else if (me.draw.type == 'custom') {
+            let rect = {
+                left: x - me.objCondition.wid / 2,
+                top: y - me.objCondition.hei / 2,
+                wid: me.objCondition.wid,
+                hei: me.objCondition.hei
+            }
+            let menuObj = me.draw.menuObj;
+            if (!menuObj) {
+                return;
+            }
 
-                rect = {
-                    left: x - me.objSelect.wid / 2,
-                    top: y - me.objSelect.hei / 2,
-                    wid: me.objSelect.wid,
-                    hei: me.objSelect.hei
-                }
+            if (rect.wid) {
+                let obj = me.pushObj(me.objCondition.type, rect);
+                menuToObj(menuObj, obj)
+                obj.allowMove = 'move';
+            }
+            me.draw = {};
+            me.refresh();
+            return;
+        } else if (me.draw.type == 'select') {
+            let rect = {
+                left: x - me.objSelect.wid / 2,
+                top: y - me.objSelect.hei / 2,
+                wid: me.objSelect.wid,
+                hei: me.objSelect.hei
             }
             rect.tag = me.draw.tag;
             rect.tagCode = me.draw.tagCode;
@@ -414,18 +613,20 @@ function LszCanvans(canvansId) {
             //me.draw.type = '';
             me.draw = {};
             me.refresh();
-            return false;
+            return;
         }
-        me.refresh();
+
 
         if (me.appendImg) {
-            me.pushImg(me.appendImg, x - me.appendImg.width / 2, y - me.appendImg.height / 2,'move')
+            me.pushImg(me.appendImg, x - me.appendImg.width / 2, y - me.appendImg.height / 2, 'move')
 
             me.appendImg = false;
-            findObj(x, y, me.objArr);
+            //findObj(x, y, me.objArr);
         }
-
-
+        if (showMenu) {
+            me.menuLeft(e);
+        }
+        me.refresh();
     }
 
     function drawComplex(obj) {
@@ -521,19 +722,30 @@ function LszCanvans(canvansId) {
         drawSelect(obj, text);
     }
 
+    function drawFocus(obj) {
+        let ctx = me.buff;
+        let rect = obj;
+        ctx.setLineDash([]);
+        ctx.strokeStyle = "#FF5722";
+        ctx.strokeRect(rect.left, rect.top, rect.wid, rect.hei);
+    }
+
     //联合条件
     function drawSelect(obj, text) {
         let ctx = me.buff;
         let rect = obj;
-        ctx.setLineDash([]);
-        if (obj.focus) {
-            //焦点 画8个矩形
-            ctx.strokeStyle = "#FF0000";
 
-        } else {
-            ctx.strokeStyle = "#333333";
-        }
-        ctx.strokeRect(rect.left, rect.top, rect.wid, rect.hei);
+        // if (obj.focus) {
+        //     //焦点 画8个矩形
+        //     ctx.strokeStyle = "#FF0000";
+        //
+        // } else {
+        //     ctx.strokeStyle = "#333333";
+        // }
+        // ctx.strokeStyle = "#333333";
+        // ctx.strokeRect(rect.left, rect.top, rect.wid, rect.hei);
+        ctx.fillStyle = "#ffEEdd";
+        ctx.fillRect(rect.left, rect.top, rect.wid, rect.hei);
         if (obj.data) {
             if (!text) {
                 text = obj.data.text;
@@ -542,7 +754,7 @@ function LszCanvans(canvansId) {
         }
         if (obj.tag) {
             let tmpRect = {
-                left: rect.left  ,
+                left: rect.left,
                 top: rect.top - rect.hei,
                 wid: 60,
                 hei: rect.hei
@@ -561,6 +773,7 @@ function LszCanvans(canvansId) {
             ctx.fillText(text, rect.left + (rect.wid / 2), rect.top + 22);
         }
     }
+
     function drawTextLeft(text, ctx, rect, color) {
         if (text) {
             ctx.fillStyle = color;
@@ -581,12 +794,12 @@ function LszCanvans(canvansId) {
         if (tmpJson) {
             for (let item of tmpJson) {
                 if (item.tagCode) {
-                    if (item.tagCode == 'success'){
+                    if (item.tagCode == 'success') {
                         //他们要 than else
                         newJson.then = item;
-                    }else if(item.tagCode == 'fail'){
+                    } else if (item.tagCode == 'fail') {
                         newJson.else = item;
-                    }else{
+                    } else {
                         newJson.if = item;
                     }
 
@@ -614,7 +827,7 @@ function LszCanvans(canvansId) {
                 json.optType = data.optType;
                 json.optText = data.optText;
             }
-            if(data.list){
+            if (data.list) {
                 json.lists = data.list;
             }
 
@@ -626,6 +839,184 @@ function LszCanvans(canvansId) {
         }
         return jsonArr;
     }
+
+    me.menuRight = function (event) {
+        let obj = cvs.findFocus(cvs.objArr);
+        if (obj && obj.id) {
+            let domId = '';
+            if (obj.type == 'select') {
+                domId = 'menu_add';
+
+            } else if (obj.type == 'complex') {
+                domId = 'menu_complex_add'
+            }
+            if (domId) {
+                var menu = document.getElementById(domId);
+                menu.setAttribute("data-id", obj.id);
+                menu.style.left = event.offsetX + "px";
+                menu.style.top = event.offsetY + "px";
+                menu.style.visibility = "visible";
+
+            }
+        }
+        me.refresh();
+    }
+    me.menuLeft = function (event) {
+        let obj = cvs.findFocus(me.objArr);
+        if (obj && obj.id) {
+            let optpos = 0;
+            let opttype = '';
+            let menuJson = conditionJson;
+            let htmlStr = '';
+            let domId = "menu_" + obj.type;
+            if ("condition" == obj.type) {
+                let rootObj = findObjParentRoot(obj);
+                if (rootObj && (rootObj.tagCode == 'success' || rootObj.tagCode == 'fail')) {
+                    menuJson = thenJson;
+                }
+                if (event.layerX > (obj.left + cvs.objCondition.wid1)) {
+                    if (event.layerX > (obj.left + cvs.objCondition.wid1 + cvs.objCondition.wid2)) {
+
+                        if (menuJson && menuJson.length) {
+                            for (let con of menuJson) {
+                                if (con.code == obj.data.leftType) {
+                                    if (con.result && con.result.length) {
+                                        for (let comp of con.result) {
+                                            htmlStr += getLiHtml(comp, 'right');
+                                        }
+                                    }
+                                    break;
+                                }
+                            }
+                        }
+
+                    } else {
+                        if (menuJson && menuJson.length) {
+                            for (let con of menuJson) {
+                                if (con.code == obj.data.leftType) {
+                                    if (con.compare && con.compare.length) {
+                                        for (let comp of con.compare) {
+                                            htmlStr += getLiHtml(comp, 'mid');
+                                        }
+                                    }
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    if (menuJson && menuJson.length) {
+                        for (let comp of menuJson) {
+                            htmlStr += getLiHtml(comp, 'left');
+
+                        }
+                        htmlStr += `<li onclick="liClick(this)" class="" data-type = 'kill' ><em  ><i class="layui-icon" style="font-size: 20px; margin-left: 2px; color: #FF8888;">&#x1007;</i></em><a href="javascript:;">删除</a></li>`
+                    }
+                }
+
+
+            } else if ('complex' == obj.type) {
+                if (event.layerX > (obj.left + obj.wid - cvs.objCondition.wid3)) {
+
+                    if (menuJson && menuJson.length) {
+                        for (let con of menuJson) {
+                            if (con.code == obj.data.leftType) {
+                                if (con.result && con.result.length) {
+                                    for (let comp of con.result) {
+                                        htmlStr += getLiHtml(comp, 'right');
+                                    }
+                                }
+                                break;
+                            }
+                        }
+                    }
+                } else if (event.layerX > (obj.left + obj.wid - cvs.objCondition.wid2 - cvs.objCondition.wid3)) {
+                    if (menuJson && menuJson.length) {
+                        for (let con of menuJson) {
+                            if (con.code == obj.data.leftType) {
+                                if (con.compare && con.compare.length) {
+                                    for (let comp of con.compare) {
+                                        htmlStr += getLiHtml(comp, 'mid');
+                                    }
+                                }
+                                break;
+                            }
+                        }
+                    }
+                } else {
+
+                    //复合 这里要算出 点的是哪个节点
+                    if (obj.data.list && event.layerX > (obj.left + cvs.objCondition.wid1)) {
+                        let list = obj.data.list;
+                        let i = 0;
+                        let left = obj.left + cvs.objCondition.wid1;
+
+                        for (let item of list) {
+                            i++; //从1开始
+                            //////////////////////////////////
+                            let wid = cvs.objCondition.wid2;
+                            if (event.layerX < left + wid) {
+                                optpos = i;
+                                opttype = 'left';
+                                break;
+                            }
+                            left += wid;
+                            wid = cvs.objCondition.wid1;
+                            if (event.layerX < left + wid) {
+                                optpos = i;
+                                opttype = 'right';
+                                break;
+                            }
+                            left += wid;
+
+                        }
+
+                    }
+
+                    if (opttype == 'left') {
+                        domId = 'menu_opt';
+
+
+                    } else {
+                        if (menuJson && menuJson.length) {
+                            for (let comp of menuJson) {
+                                htmlStr += getLiHtml(comp, 'left');
+
+                            }
+                            htmlStr += `<li onclick="liClick(this)" class="" data-type = 'kill' ><em  ><i class="layui-icon" style="font-size: 20px; margin-left: 2px; color: #FF8888;">&#x1007;</i></em><a href="javascript:;">删除</a></li>`
+                        }
+                    }
+
+
+                }
+                if (domId) {
+                    let menu = document.getElementById(domId);
+                    menu.setAttribute("data-optpos", '');
+                    menu.setAttribute("data-opttype", '');
+                    if (optpos) {
+                        menu.setAttribute("data-optpos", optpos);
+                    }
+                    if (opttype) {
+                        menu.setAttribute("data-opttype", opttype);
+                    }
+                }
+            }
+
+            var menu = document.getElementById(domId);
+            if (menu) {
+                if (htmlStr) {
+                    menu.innerHTML = htmlStr;
+                }
+                //client  这里
+                menu.setAttribute("data-id", obj.id);
+                menu.style.left = event.offsetX + "px";
+                menu.style.top = event.offsetY + "px";
+                menu.style.visibility = "visible";
+            }
+
+        }
+    }
+
 }
 
 function newCtx(wid, hei) {

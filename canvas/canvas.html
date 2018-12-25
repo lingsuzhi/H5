@@ -113,42 +113,52 @@
         <input style="margin-top: 10px" type="button" class="layui-btn layui-btn-radius layui-btn-primary" value="文本框"
                onmousedown="drawDo('rect')"/>
 
+        <br/>
+        <input type="button" style="margin-top: 10px"  class="layui-btn layui-btn-radius " value="学历" onmousedown="appendObj('education')"/>
+        <br/>
+        <input type="button" style="margin-top: 10px"  class="layui-btn layui-btn-radius " value="年龄" onmousedown="appendObj('age')"/>
+        <br/>
+        <input type="button" style="margin-top: 10px"  class="layui-btn layui-btn-radius " value="性别" onmousedown="appendObj('sex')"/>
+
     </div>
     <div style="position: absolute;left: 150px;top:0px">
-        <canvas id="myCanvas" width="1600" height="1600">
+        <canvas id="myCanvas" width="1700" height="1600">
             贺子华是个小菜B
         </canvas>
+
+
+
+        <ul id="menu_add" class="menu" style="visibility: hidden; background: silver;">
+
+            <li class="" data-type='condition'><em></em><a href="javascript:;">添加条件</a></li>
+            <li class="" data-type='unionCondition'><em></em><a href="javascript:;">添加联合条件</a></li>
+            <li class="" data-type='complex'><em></em><a href="javascript:;">添加复合条件</a></li>
+        </ul>
+
+        <ul id="menu_select" class="menu" style="visibility: hidden; background: silver;">
+            <li class="" data-type='and'><em></em><a href="javascript:;">并且</a></li>
+            <li class="" data-type='or'><em></em><a href="javascript:;">或者</a></li>
+            <li class="" data-type='kill'><em><i class="layui-icon" style="font-size: 20px; margin-left: 2px; color: #FF8888;">&#x1007;</i></em><a
+                    href="javascript:;">删除</a></li>
+        </ul>
+        <ul id="menu_condition" class="menu" style="visibility: hidden; background: silver;">
+
+        </ul>
+        <ul id="menu_opt" class="menu" style="visibility: hidden; background: silver;">
+            <li class="" data-type='opt_add' data-text ='加上'><em></em><a href="javascript:;">加上</a></li>
+            <li class="" data-type='opt_sub' data-text ='减去'><em></em><a href="javascript:;">减去</a></li>
+            <li class="" data-type='opt_mul' data-text ='乘以'><em></em><a href="javascript:;">乘以</a></li>
+            <li class="" data-type='opt_div' data-text ='除以'><em></em><a href="javascript:;">除以</a></li>
+        </ul>
+        <ul id="menu_complex" class="menu" style="visibility: hidden; background: silver;">
+            <!--写这个方便以后改样式-->
+        </ul>
+        <ul id="menu_complex_add" class="menu" style="visibility: hidden; background: silver;">
+
+            <li class="" data-type='complex_add'><em></em><a href="javascript:;">添加复合条件</a></li>
+        </ul>
     </div>
 </div>
-<ul id="menu_add" class="menu" style="visibility: hidden; background: silver;">
-
-    <li class="" data-type='condition'><em></em><a href="javascript:;">添加条件</a></li>
-    <li class="" data-type='unionCondition'><em></em><a href="javascript:;">添加联合条件</a></li>
-    <li class="" data-type='complex'><em></em><a href="javascript:;">添加复合条件</a></li>
-</ul>
-
-<ul id="menu_select" class="menu" style="visibility: hidden; background: silver;">
-    <li class="" data-type='and'><em></em><a href="javascript:;">并且</a></li>
-    <li class="" data-type='or'><em></em><a href="javascript:;">或者</a></li>
-    <li class="" data-type='kill'><em><i class="layui-icon" style="font-size: 20px; margin-left: 2px; color: #FF8888;">&#x1007;</i></em><a
-            href="javascript:;">删除</a></li>
-</ul>
-<ul id="menu_condition" class="menu" style="visibility: hidden; background: silver;">
-
-</ul>
-<ul id="menu_opt" class="menu" style="visibility: hidden; background: silver;">
-    <li class="" data-type='opt_add' data-text ='加上'><em></em><a href="javascript:;">加上</a></li>
-    <li class="" data-type='opt_sub' data-text ='减去'><em></em><a href="javascript:;">减去</a></li>
-    <li class="" data-type='opt_mul' data-text ='乘以'><em></em><a href="javascript:;">乘以</a></li>
-    <li class="" data-type='opt_div' data-text ='除以'><em></em><a href="javascript:;">除以</a></li>
-</ul>
-<ul id="menu_complex" class="menu" style="visibility: hidden; background: silver;">
-<!--写这个方便以后改样式-->
-</ul>
-<ul id="menu_complex_add" class="menu" style="visibility: hidden; background: silver;">
-
-    <li class="" data-type='complex_add'><em></em><a href="javascript:;">添加复合条件</a></li>
-</ul>
 </body>
 </html>
 
