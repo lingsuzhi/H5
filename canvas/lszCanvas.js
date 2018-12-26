@@ -618,6 +618,9 @@ function LszCanvans(canvansId) {
                 setFocusByRect(mRect);
                 showMenu = false;
             }
+        } else if (me.draw.type == 'rect') {
+            let mRect = me.mouseRect.getRect();
+            me.pushObj(me.draw.type,mRect);
         } else if (me.draw.type == 'custom') {
             let rect = {
                 left: x - me.objCondition.wid / 2,
@@ -654,13 +657,13 @@ function LszCanvans(canvansId) {
             if (rect.wid) {
                 me.pushObj(me.draw.type, rect);
             }
-            //me.draw.type = '';
+            me.draw.type = '';
             me.draw = {};
             me.refresh();
             return;
         }
 
-
+        me.draw.type = ''
         if (me.appendImg) {
             me.pushImg(me.appendImg, x - me.appendImg.width / 2, y - me.appendImg.height / 2, 'move')
 
