@@ -58,8 +58,9 @@ function LszCanvans(canvansId) {
         me.draw.code = code;
         me.draw.type = 'custom';
         me.draw.menuObj = menuObj;
-        me.canvansDom.style.cursor = 'all-scroll';
-        me.mouseRect.show = 3;
+        //me.canvansDom.style.cursor = 'crosshair';
+        me.mouseRect.show = 'bycode';
+
     }
     //鼠标矩形
     me.mouseRectDraw = function (ctx) {
@@ -310,7 +311,7 @@ function LszCanvans(canvansId) {
     me.findFocusCount = function () {
         let count = 0;
         me.diguiFun(me.objArr, function (obj) {
-            if (obj.focus && !obj.parentId) {
+            if (obj.focus && !obj.parentId && !obj.tagCode) {
                 count++
             }
         })
@@ -443,38 +444,50 @@ function LszCanvans(canvansId) {
         mergeObj();
     }
 
-    me.mergeLeft = 800;
+    me.mergeLeft = 450;
     me.mergeTop = 100;
-
+    me.mergeLeft2 = 900;
     function sumHeight(arr) {
         let sumHei = 0;
-        me.diguiFun(arr, function (obj) {
-            sumHei += obj.hei;
-        })
+        if (arr) {
+            me.diguiFun(arr, function (obj) {
+                sumHei += obj.hei;
+            })
+        }
+
         return sumHei;
     }
 
     me.mergeObjDo = function (code) {
         let list = [];
+        let grageMax = 0;
         me.diguiFun(me.objArr, function (obj) {
-            if (obj.focus && !obj.parentId) {
+            if (obj.focus && !obj.parentId && !obj.tagCode) {
                 //let newObj = Object.assign({}, obj);
+
+                if (obj.mergeGrade && obj.mergeGrade > grageMax) {
+                    grageMax = obj.mergeGrade;
+                }
+
                 let newObj = JSON.parse(JSON.stringify(obj));
 
                 newObj.allowMove = '';
                 newObj.merge = true;
                 list.push(newObj);
-
+                // if (obj.merge){
+                //     //这个要删掉、
+                //     obj.state = 'kill';
+                // }
             }
         })
         let obj = me.pushSelect(me.mergeLeft, me.mergeTop);
         if (obj) {
+            obj.mergeGrade = grageMax + 1;
+            obj.merge = true;
             let menuObj = findMenuByCode(code);
             if (menuObj) {
                 menuToObj(menuObj, obj);
                 obj.children = list;
-                let tmpHei = sumHeight(list)
-                me.mergeTop += tmpHei + 60;
             }
             // 很简单的逻辑
             me.diguiFunAndId(list, obj.id, function (obj, id) {
@@ -482,8 +495,35 @@ function LszCanvans(canvansId) {
                 obj.parentId = id;
             })
         }
+        me.mergeMoveDo();
         me.refresh()
     }
+    me.mergeMoveDo = function () {
+        me.mergeTop = 100;
+        me.mergeTop2 = 100;
+        for (let obj of me.objArr) {
+            if (obj.state == 'kill') {
+                continue;
+            }
+            if (obj.merge) {
+
+                let tmpHei = sumHeight(obj.children);
+
+                if (obj.mergeGrade > 2) {
+                    obj.left = me.mergeLeft2;
+                    obj.top = me.mergeTop2;
+                    me.mergeTop2 += tmpHei + obj.hei + 20;
+                } else {
+                    obj.left = me.mergeLeft;
+                    obj.top = me.mergeTop;
+                    me.mergeTop += tmpHei + obj.hei + 20;
+                }
+
+            }
+
+        }
+    }
+
 
     function drawLine(ctx, x, y, x2, y2, color) {
         if (!color) {
@@ -594,6 +634,10 @@ function LszCanvans(canvansId) {
                 let obj = me.pushObj(me.objCondition.type, rect);
                 menuToObj(menuObj, obj)
                 obj.allowMove = 'move';
+                if (obj.left > 150) {
+                    obj.left = 150;
+                }
+                obj.mergeGrade = 1;
             }
             me.draw = {};
             me.refresh();

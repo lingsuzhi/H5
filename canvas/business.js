@@ -1,30 +1,31 @@
 var cvs = new LszCanvans("myCanvas");
-
-cvs.pushObj(cvs.objSelect.type, {
-    left: cvs.objLeft,
-    top: cvs.objTop,
-    wid: cvs.objSelect.wid,
-    hei: cvs.objSelect.hei,
-    tagCode: 'if',
-    tag: '如果：'
-});
-cvs.pushObj(cvs.objSelect.type, {
-    left: cvs.objLeft,
-    top: 250,
-    wid: cvs.objSelect.wid,
-    hei: cvs.objSelect.hei,
-    tagCode: 'success',
-    tag: '那么：'
-});
-cvs.pushObj(cvs.objSelect.type, {
-    left: cvs.objLeft,
-    top: 400,
-    wid: cvs.objSelect.wid,
-    hei: cvs.objSelect.hei,
-    tagCode: 'fail',
-    tag: '否则：'
-});
-cvs.refresh();
+function initIf() {
+    cvs.pushObj(cvs.objSelect.type, {
+        left: cvs.objLeft,
+        top: cvs.objTop,
+        wid: cvs.objSelect.wid,
+        hei: cvs.objSelect.hei,
+        tagCode: 'if',
+        tag: '如果：'
+    });
+    cvs.pushObj(cvs.objSelect.type, {
+        left: cvs.objLeft,
+        top: 250,
+        wid: cvs.objSelect.wid,
+        hei: cvs.objSelect.hei,
+        tagCode: 'success',
+        tag: '那么：'
+    });
+    cvs.pushObj(cvs.objSelect.type, {
+        left: cvs.objLeft,
+        top: 400,
+        wid: cvs.objSelect.wid,
+        hei: cvs.objSelect.hei,
+        tagCode: 'fail',
+        tag: '否则：'
+    });
+    cvs.refresh();
+}
 
 function btn1() {
     cvs.refresh();
