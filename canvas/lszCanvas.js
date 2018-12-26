@@ -8,17 +8,17 @@ function LszCanvans(canvansId) {
 
     me.objComplex = {
         wid: 300,
-        hei: 30,
+        hei: 26,
         type: 'complex'
     }
     me.objSelect = {
         wid: 80,
-        hei: 30,
+        hei: 26,
         type: 'select'
     };
     me.objCondition = {
         wid: 260,
-        hei: 30,
+        hei: 26,
         type: 'condition'
     };
     me.objCondition.wid1 = 100;
@@ -451,11 +451,11 @@ function LszCanvans(canvansId) {
         let sumHei = 0;
         if (arr) {
             me.diguiFun(arr, function (obj) {
-                sumHei += obj.hei;
+                sumHei += obj.hei + me.objSpaceHei;
             })
         }
 
-        return sumHei;
+        return sumHei+me.objSpaceHei;
     }
 
     me.mergeObjDo = function (code) {
@@ -512,11 +512,11 @@ function LszCanvans(canvansId) {
                 if (obj.mergeGrade > 2) {
                     obj.left = me.mergeLeft2;
                     obj.top = me.mergeTop2;
-                    me.mergeTop2 += tmpHei + obj.hei + 20;
+                    me.mergeTop2 += tmpHei + obj.hei + 1;
                 } else {
                     obj.left = me.mergeLeft;
                     obj.top = me.mergeTop;
-                    me.mergeTop += tmpHei + obj.hei + 20;
+                    me.mergeTop += tmpHei + obj.hei + 1;
                 }
 
             }
@@ -811,10 +811,10 @@ function LszCanvans(canvansId) {
         if (text) {
             ctx.fillStyle = "#333333";
 
-            ctx.font = "18px Arial";
+            ctx.font = "16px Arial";
             ctx.textAlign = 'center';
 
-            ctx.fillText(text, rect.left + (rect.wid / 2), rect.top + 22);
+            ctx.fillText(text, rect.left + (rect.wid / 2), rect.top + 20);
         }
     }
 
@@ -822,10 +822,10 @@ function LszCanvans(canvansId) {
         if (text) {
             ctx.fillStyle = color;
 
-            ctx.font = "18px Arial";
+            ctx.font = "16px Arial";
             ctx.textAlign = 'left';
 
-            ctx.fillText(text, rect.left, rect.top + 22);
+            ctx.fillText(text, rect.left, rect.top + 20);
         }
     }
 
